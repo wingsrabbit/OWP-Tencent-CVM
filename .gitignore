@@ -1,0 +1,31 @@
+# Local credentials / deployment notes (never publish)
+*.local.md
+SECRETS.local.md
+DEPLOY-*.md
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# macOS / editors
+.DS_Store
+._*
+*.swp
+*~
+.idea/
+.vscode/
+
+# WHMCS runtime / generated data
+templates_c/
+*.log
+
+# PHP / dependency caches
+vendor/
+composer.lock
+
+# Build / package artifacts
+dist/
+build/
+*.zip
+*.tar.gz
