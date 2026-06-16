@@ -71,7 +71,7 @@ function owp_tencentcvm_output(array $vars): void
 
     $html = '<div class="container-fluid owp-tencentcvm-admin">';
     $html .= '<h2>OWP Tencent CVM</h2>';
-    $html .= '<p class="text-muted">WHMCS admin addon skeleton installed. Live Tencent Cloud API calls are disabled in v0.2.</p>';
+    $html .= '<p class="text-muted">WHMCS admin addon skeleton installed. Tencent Cloud API client is available in the library layer, but lifecycle actions are not wired in v0.3.</p>';
     $html .= '<div class="alert alert-warning">';
     $html .= 'This version only creates local WHMCS module structure and database tables. Configure no production secrets here yet.';
     $html .= '</div>';

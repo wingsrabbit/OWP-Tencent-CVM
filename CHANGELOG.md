@@ -10,6 +10,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3] - 2026-06-16
+
+### Added
+
+- Added a self-contained Tencent Cloud API 3.0 client using TC3-HMAC-SHA256 signing and POST JSON requests.
+- Added normalized Tencent API response handling through `TencentResponse`.
+- Added Tencent API error context through `TencentApiException`.
+- Added `Redactor` for masking credentials, authorization headers, tokens, and passwords before logging.
+- Added CVM library methods for describe, dry-run run, start, stop, reboot, reset password, VNC URL, and terminate actions.
+- Added `docs/TENCENT_API.md` documenting the client behavior and safety boundaries.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, and install docs for the v0.3 API foundation stage.
+- Kept WHMCS provisioning and lifecycle entrypoints returning readable "not implemented" messages, so the new client is not invoked automatically.
+
 ## [0.2] - 2026-06-16
 
 ### Added
