@@ -173,12 +173,19 @@ final class TencentClient
     /**
      * @param list<string> $instanceIds
      */
-    public function resetInstancesPassword(string $region, array $instanceIds, string $password): TencentResponse
+    public function resetInstancesPassword(string $region, array $instanceIds, string $password, bool $forceStop = false, string $userName = ''): TencentResponse
     {
-        return $this->request('ResetInstancesPassword', [
+        $payload = [
             'InstanceIds' => array_values($instanceIds),
             'Password' => $password,
-        ], $region);
+            'ForceStop' => $forceStop,
+        ];
+
+        if ($userName !== '') {
+            $payload['UserName'] = $userName;
+        }
+
+        return $this->request('ResetInstancesPassword', $payload, $region);
     }
 
     public function describeInstanceVncUrl(string $region, string $instanceId): TencentResponse

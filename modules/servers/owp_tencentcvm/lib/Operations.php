@@ -77,6 +77,24 @@ final class Operations
         }
     }
 
+    public static function changePassword(array $params): string
+    {
+        try {
+            return (new LifecycleManager())->changePassword($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function changePackage(array $params): string
+    {
+        try {
+            return (new LifecycleManager())->changePackage($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
     public static function syncInstanceStatus(array $params): string
     {
         try {
@@ -118,7 +136,7 @@ final class Operations
         return [
             'version' => Config::version(),
             'tables' => Schema::tables(),
-            'apiStatus' => 'Client available; guarded CreateAccount, suspend, unsuspend, terminate, and read-only status sync are wired',
+            'apiStatus' => 'Client available; guarded CreateAccount, lifecycle controls, password reset, and read-only status sync are wired',
             'liveCalls' => 'Write calls are blocked by dry-run by default; termination also requires explicit addon approval',
         ];
     }

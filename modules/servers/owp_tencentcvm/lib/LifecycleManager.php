@@ -112,6 +112,57 @@ final class LifecycleManager
 
     /**
      * @param array<string, mixed> $params
+     */
+    public function changePassword(array $params): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+        $password = (string) ($params['password'] ?? '');
+
+        $this->assertPasswordLooksValid($password);
+
+        if ($this->dryRunEnabled($params)) {
+            return $this->recordBlockedByDryRun($serviceId, $templateId, 'ChangePassword');
+        }
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->resetInstancesPassword($this->region($params, $instance), [$instanceId], $password, false);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'ChangePassword', $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'ChangePassword', $exception->getMessage());
+        }
+
+        Instances::upsertForService($serviceId, ['state' => 'password_resetting']);
+        Operations::record($serviceId, $templateId, 'ChangePassword', 'success', 'ResetInstancesPassword accepted.', $response->requestId());
+
+        return 'success';
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function changePackage(array $params): string
+    {
+        $serviceId = Instances::serviceId($params);
+        $templateId = null;
+
+        if ($serviceId > 0) {
+            $instance = Instances::findByServiceId($serviceId);
+            if ($instance !== null) {
+                $templateId = $this->templateId($instance);
+            }
+        }
+
+        Operations::record($serviceId, $templateId, 'ChangePackage', 'blocked', 'ChangePackage is not supported in v0.52.');
+
+        return 'ChangePackage is not supported in v0.52. Open a planned resize workflow before changing Tencent CVM instance types.';
+    }
+
+    /**
+     * @param array<string, mixed> $params
      * @return array{0:int, 1:array<string, mixed>}
      */
     private function recordedInstance(array $params, bool $allowMissing): array
@@ -174,6 +225,28 @@ final class LifecycleManager
         }
 
         return $instanceId;
+    }
+
+    private function assertPasswordLooksValid(string $password): void
+    {
+        $length = strlen($password);
+        if ($length < 8 || $length > 30) {
+            throw new RuntimeException('Tencent CVM password must be 8 to 30 characters.');
+        }
+
+        if (str_starts_with($password, '/') || preg_match('/\s/', $password) === 1) {
+            throw new RuntimeException('Tencent CVM password must not start with "/" or contain whitespace.');
+        }
+
+        $categories = 0;
+        $categories += preg_match('/[a-z]/', $password) === 1 ? 1 : 0;
+        $categories += preg_match('/[A-Z]/', $password) === 1 ? 1 : 0;
+        $categories += preg_match('/[0-9]/', $password) === 1 ? 1 : 0;
+        $categories += preg_match('/[^A-Za-z0-9]/', $password) === 1 ? 1 : 0;
+
+        if ($categories < 3) {
+            throw new RuntimeException('Tencent CVM password must include at least three character categories.');
+        }
     }
 
     private function recordBlockedByDryRun(int $serviceId, ?int $templateId, string $operation): string
