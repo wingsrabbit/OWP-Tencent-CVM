@@ -10,6 +10,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.12] - 2026-06-16
+
+### Added
+
+- Added the client-area CVM control panel design prompt at `docs/design/client-area-prompt.md`.
+- Documented the external design-tool workflow in `README.md`.
+
+### Changed
+
+- Refined the client-area prompt after reviewing the first `docs/design/tx-cvm.zip` output, emphasizing a production-like WHMCS embedded module over a design-showcase page.
+- Reworked the client-area prompt for pure design AI output after reviewing `docs/design/tx-cvm 2`, limiting the next iteration to one customer-facing desktop main panel.
+- Retargeted the client-area prompt for Claude Design / Artifacts H5 output, allowing hidden interactive modals while keeping the rendered page to one customer-facing WHMCS panel.
+
 ## [0.11] - 2026-06-16
 
 ### Added

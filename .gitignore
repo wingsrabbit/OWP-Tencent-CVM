@@ -27,5 +27,6 @@ composer.lock
 # Build / package artifacts
 dist/
 build/
+docs/design/tx-cvm*/
 *.zip
 *.tar.gz
