@@ -1,9 +1,8 @@
 # Install Guide
 
-OWP Tencent CVM v0.41 is a WHMCS module skeleton with a bundled Tencent Cloud
-API client, encrypted credential storage, admin-side resource templates, and
-read-only template validation. WHMCS lifecycle entrypoints still do not call
-Tencent Cloud automatically.
+OWP Tencent CVM v0.5 is a WHMCS module with a bundled Tencent Cloud API client,
+encrypted credential storage, admin-side resource templates, read-only template
+validation, guarded CreateAccount provisioning, and read-only status sync.
 
 ## What To Upload
 
@@ -28,7 +27,7 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.41` in the module metadata.
+4. Confirm the admin page shows version `0.5` in the module metadata.
 5. Save credentials and create at least one resource template before later provisioning phases.
 6. Use `Validate` on each template to check zone, image, instance type, subnet, security group, and bandwidth policy before enabling sales.
 
@@ -42,8 +41,13 @@ WHMCS Capsule database layer.
    - Dry Run
 4. Save the product.
 
-Provisioning, lifecycle buttons, password reset, and console links intentionally
-return readable "not implemented" messages in v0.41.
+CreateAccount requires the selected admin template to be enabled and validated
+as `valid`. Dry-run is enabled by default and returns a WHMCS module error after
+confirming the request shape, so no billable CVM is created until dry-run is
+explicitly disabled for the product and addon settings.
+
+Suspend, unsuspend, terminate, power buttons, password reset, and console links
+intentionally return readable "not implemented" messages in v0.5.
 
 ## Secrets
 

@@ -63,6 +63,23 @@ final class Templates
     }
 
     /**
+     * @return null|array<string, mixed>
+     */
+    public static function findByName(string $name): ?array
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return null;
+        }
+
+        $row = Capsule::table(Schema::TEMPLATES_TABLE)
+            ->where('name', $name)
+            ->first();
+
+        return $row ? (array) $row : null;
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public static function save(array $data): int

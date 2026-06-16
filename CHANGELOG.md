@@ -10,6 +10,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5] - 2026-06-16
+
+### Added
+
+- Added guarded `CreateAccount` provisioning through `Provisioner`.
+- Added WHMCS service-instance persistence helpers in `Instances`.
+- Added operation audit inserts through `Operations::record`.
+- Added Tencent `DescribeInstances` by ID support for read-only status sync.
+- Added admin `Sync Instance Status` wiring for stored Tencent CVM instances.
+- Added client-area display for stored instance ID, state, public IP, and private IP.
+
+### Changed
+
+- Updated `CreateAccount` to require an enabled admin template with `validation_status = valid`.
+- Kept dry-run enabled by default through addon settings and product module options.
+- Added Tencent `ClientToken` idempotency to `RunInstances` payloads.
+- Updated `README.md`, `VERSION`, install docs, and Tencent API docs for the v0.5 guarded provisioning stage.
+- Kept suspend, unsuspend, terminate, power, password reset, package change, and console actions returning readable "not implemented" messages.
+
 ## [0.41] - 2026-06-16
 
 ### Added

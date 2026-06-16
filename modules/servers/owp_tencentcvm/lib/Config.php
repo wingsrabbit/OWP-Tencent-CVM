@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.41';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.5';
     }
 
     /**
@@ -25,7 +25,7 @@ final class Config
             'Template Name' => [
                 'Type' => 'text',
                 'Size' => '40',
-                'Description' => 'Admin-defined CVM resource template name. Lifecycle wiring starts in later phases.',
+                'Description' => 'Admin-defined enabled and validated CVM resource template name.',
             ],
             'Default Region' => [
                 'Type' => 'text',
@@ -35,7 +35,7 @@ final class Config
             ],
             'Dry Run' => [
                 'Type' => 'yesno',
-                'Description' => 'Reserve the safety flag for future Tencent Cloud API calls.',
+                'Description' => 'Keep enabled until this product is ready to create billable Tencent Cloud CVMs.',
             ],
         ];
     }
@@ -52,8 +52,8 @@ final class Config
             'templateName' => isset($params['configoption1']) ? (string) $params['configoption1'] : '',
             'region' => isset($params['configoption2']) ? (string) $params['configoption2'] : '',
             'dryRun' => !empty($params['configoption3']),
-            'statusLabel' => 'Module skeleton installed',
-            'notice' => 'Tencent Cloud CVM lifecycle operations are intentionally not wired in v0.41.',
+            'statusLabel' => 'CreateAccount guarded',
+            'notice' => 'CreateAccount and read-only status sync are wired in v0.5. Power controls remain intentionally disabled.',
         ];
     }
 }

@@ -27,7 +27,7 @@ function owp_tencentcvm_ConfigOptions(): array
 
 function owp_tencentcvm_CreateAccount(array $params): string
 {
-    return Operations::notImplemented('CreateAccount', 'Provisioning starts in v0.5 after the API client is implemented.');
+    return Operations::createAccount($params);
 }
 
 function owp_tencentcvm_SuspendAccount(array $params): string
@@ -42,7 +42,7 @@ function owp_tencentcvm_UnsuspendAccount(array $params): string
 
 function owp_tencentcvm_TerminateAccount(array $params): string
 {
-    return Operations::notImplemented('TerminateAccount', 'Destructive termination is intentionally not wired in v0.4.');
+    return Operations::notImplemented('TerminateAccount', 'Destructive termination is intentionally not wired in v0.5.');
 }
 
 function owp_tencentcvm_ChangePassword(array $params): string
@@ -105,5 +105,5 @@ function owp_tencentcvm_OpenConsole(array $params): string
 
 function owp_tencentcvm_SyncInstanceStatus(array $params): string
 {
-    return Operations::notImplemented('SyncInstanceStatus');
+    return Operations::syncInstanceStatus($params);
 }

@@ -210,7 +210,7 @@ Acceptance:
 
 ### v0.41 · Quota and template validation
 
-Status: current stacked PR.
+Status: stacked PR.
 
 Deliverables:
 
@@ -226,6 +226,8 @@ Acceptance:
 ## Phase 4 · Provisioning Lifecycle
 
 ### v0.5 · CreateAccount and status persistence
+
+Status: current stacked PR.
 
 Deliverables:
 
