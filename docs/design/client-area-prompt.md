@@ -1,21 +1,16 @@
-# Client Area Design Prompt
+# Tencent CVM Client Area Design Brief
 
-Copy the prompt below into the external design tool. This revision includes
-review feedback from the first `docs/design/tx-cvm.zip` output. The output
-should be a visual design/spec for the WHMCS product detail page only. Do not
-generate implementation code.
+请按以下要求输出一个视觉设计/spec。整份文档可以直接作为设计 AI 的输入，不需要额外上下文。
 
----
-
-## Prompt
+不要生成实现代码。不要设计登录页、独立后台、独立 app、营销首页或云厂商官网风格页面。只设计 WHMCS 客户区产品详情页里的 CVM 控制面板。
 
 你是一名面向托管服务和云服务器产品的高级 SaaS / 客户控制台设计师。请为一个嵌入 WHMCS 客户区产品详情页的「腾讯云 CVM 管理面板」做 UI/UX 设计。设计目标不是营销落地页，而是客户日常管理自己云服务器的实用控制面板。
 
 这个页面会出现在 WHMCS 的单个产品/服务详情页中，不是独立应用，不要设计全屏 app shell，不要设计独立侧边栏，不要设计营销 hero。它应该像一个专业、紧凑、清晰的服务管理模块，可以被放入 WHMCS 主题内容区。
 
-## 第一版复审后的修正目标
+## 本次设计目标
 
-第一版已经覆盖了摘要、操作、弹窗、异步状态、错误态、移动版和数据来源标注。下一版请把重点从「设计说明展示页」收敛成「可直接作为实现依据的真实 WHMCS 客户产品页」。
+请把产出收敛成「可直接作为实现依据的真实 WHMCS 客户产品页」，不要做成设计说明展示页。
 
 必须遵守:
 
