@@ -50,6 +50,33 @@ final class Operations
         }
     }
 
+    public static function suspendAccount(array $params): string
+    {
+        try {
+            return (new LifecycleManager())->suspendAccount($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function unsuspendAccount(array $params): string
+    {
+        try {
+            return (new LifecycleManager())->unsuspendAccount($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function terminateAccount(array $params): string
+    {
+        try {
+            return (new LifecycleManager())->terminateAccount($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
     public static function syncInstanceStatus(array $params): string
     {
         try {
@@ -91,8 +118,8 @@ final class Operations
         return [
             'version' => Config::version(),
             'tables' => Schema::tables(),
-            'apiStatus' => 'Client available; guarded CreateAccount and read-only status sync are wired',
-            'liveCalls' => 'CreateAccount is blocked by dry-run by default and requires a validated enabled template',
+            'apiStatus' => 'Client available; guarded CreateAccount, suspend, unsuspend, terminate, and read-only status sync are wired',
+            'liveCalls' => 'Write calls are blocked by dry-run by default; termination also requires explicit addon approval',
         ];
     }
 }

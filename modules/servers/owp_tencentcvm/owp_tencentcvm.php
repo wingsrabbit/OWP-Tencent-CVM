@@ -32,17 +32,17 @@ function owp_tencentcvm_CreateAccount(array $params): string
 
 function owp_tencentcvm_SuspendAccount(array $params): string
 {
-    return Operations::notImplemented('SuspendAccount', 'Suspend policy will be wired after instance persistence exists.');
+    return Operations::suspendAccount($params);
 }
 
 function owp_tencentcvm_UnsuspendAccount(array $params): string
 {
-    return Operations::notImplemented('UnsuspendAccount', 'Unsuspend policy will be wired after instance persistence exists.');
+    return Operations::unsuspendAccount($params);
 }
 
 function owp_tencentcvm_TerminateAccount(array $params): string
 {
-    return Operations::notImplemented('TerminateAccount', 'Destructive termination is intentionally not wired in v0.5.');
+    return Operations::terminateAccount($params);
 }
 
 function owp_tencentcvm_ChangePassword(array $params): string

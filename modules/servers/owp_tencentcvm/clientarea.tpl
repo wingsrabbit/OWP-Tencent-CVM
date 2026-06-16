@@ -47,7 +47,7 @@
             </table>
 
             <p class="text-muted">
-                CreateAccount and read-only status sync are available. Power controls, reinstall, password reset, VNC console, and operation history will be wired in later lifecycle phases.
+                WHMCS service lifecycle actions are guarded by admin safety settings. Customer power controls, reinstall, password reset, VNC console, and operation history will be wired in later lifecycle phases.
             </p>
         </div>
     </div>

@@ -1,9 +1,9 @@
 # Tencent Cloud API Client
 
-v0.5 includes a self-contained Tencent Cloud API 3.0 client for CVM, read-only
+v0.51 includes a self-contained Tencent Cloud API 3.0 client for CVM, read-only
 validation calls needed by the admin template workflow, guarded CreateAccount
-provisioning, and read-only instance status sync. It is bundled inside the WHMCS
-module and does not require Composer.
+provisioning, guarded service lifecycle actions, and read-only instance status
+sync. It is bundled inside the WHMCS module and does not require Composer.
 
 ## Signing
 
@@ -39,9 +39,13 @@ The library layer exposes these methods:
 
 `runInstances()` defaults to `DryRun = true` unless the caller explicitly passes
 `false`. CreateAccount uses `runInstances()` only after the selected admin
-template is enabled, validated as `valid`, and dry-run is disabled. Start, stop,
-reboot, password reset, VNC, and terminate methods remain library-only in v0.5
-and are not wired into customer buttons.
+template is enabled, validated as `valid`, and dry-run is disabled.
+
+WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
+`StartInstances` only when dry-run is disabled. WHMCS TerminateAccount calls
+`TerminateInstances` only when dry-run is disabled and the addon
+`allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
+password reset, VNC, and package-change buttons remain unwired in v0.51.
 
 ## Supported VPC Validation Methods
 

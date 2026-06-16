@@ -10,6 +10,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.51] - 2026-06-16
+
+### Added
+
+- Added `LifecycleManager` for WHMCS SuspendAccount, UnsuspendAccount, and TerminateAccount.
+- Added dry-run blocking for suspend, unsuspend, and terminate API calls.
+- Added addon `allow_terminate` safety setting for destructive Tencent CVM termination.
+- Added lifecycle operation audit rows for start, stop, terminate, blocked, skipped, and dry-run outcomes.
+
+### Changed
+
+- Wired WHMCS SuspendAccount to guarded Tencent `StopInstances`.
+- Wired WHMCS UnsuspendAccount to guarded Tencent `StartInstances`.
+- Wired WHMCS TerminateAccount to guarded Tencent `TerminateInstances` with an extra explicit addon approval gate.
+- Updated `README.md`, `VERSION`, install docs, and Tencent API docs for the v0.51 guarded service lifecycle stage.
+- Kept customer power buttons, password reset, console, and package change returning readable "not implemented" messages.
+
 ## [0.5] - 2026-06-16
 
 ### Added

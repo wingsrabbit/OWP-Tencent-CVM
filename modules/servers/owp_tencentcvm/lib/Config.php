@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.5';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.51';
     }
 
     /**
@@ -52,8 +52,8 @@ final class Config
             'templateName' => isset($params['configoption1']) ? (string) $params['configoption1'] : '',
             'region' => isset($params['configoption2']) ? (string) $params['configoption2'] : '',
             'dryRun' => !empty($params['configoption3']),
-            'statusLabel' => 'CreateAccount guarded',
-            'notice' => 'CreateAccount and read-only status sync are wired in v0.5. Power controls remain intentionally disabled.',
+            'statusLabel' => 'Lifecycle guarded',
+            'notice' => 'WHMCS CreateAccount, suspend, unsuspend, guarded terminate, and read-only status sync are wired in v0.51. Customer power controls remain intentionally disabled.',
         ];
     }
 }

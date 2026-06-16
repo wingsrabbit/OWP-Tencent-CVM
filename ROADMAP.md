@@ -227,7 +227,7 @@ Acceptance:
 
 ### v0.5 · CreateAccount and status persistence
 
-Status: current stacked PR.
+Status: stacked PR.
 
 Deliverables:
 
@@ -242,6 +242,8 @@ Acceptance:
 - Failure states are recoverable from admin logs.
 
 ### v0.51 · Suspend, unsuspend, terminate
+
+Status: current stacked PR.
 
 Deliverables:
 
