@@ -10,6 +10,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.13] - 2026-06-16
+
+### Added
+
+- Added the Claude Design prompt for the WHMCS admin addon page at `docs/design/admin-addon-prompt.md`.
+- Linked both design prompts from `README.md`.
+
 ## [0.12] - 2026-06-16
 
 ### Added
