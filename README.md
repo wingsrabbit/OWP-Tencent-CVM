@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.1-blue)
+![version](https://img.shields.io/badge/version-v0.12-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)

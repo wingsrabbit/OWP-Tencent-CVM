@@ -17,6 +17,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Added the client-area CVM control panel design prompt at `docs/design/client-area-prompt.md`.
 - Documented the external design-tool workflow in `README.md`.
 
+### Changed
+
+- Refined the client-area prompt after reviewing the first `docs/design/tx-cvm.zip` output, emphasizing a production-like WHMCS embedded module over a design-showcase page.
+
 ## [0.11] - 2026-06-16
 
 ### Added

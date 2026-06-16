@@ -1,8 +1,9 @@
 # Client Area Design Prompt
 
-Copy the prompt below into the external design tool. The output should be a
-visual design/spec for the WHMCS product detail page only. Do not generate
-implementation code.
+Copy the prompt below into the external design tool. This revision includes
+review feedback from the first `docs/design/tx-cvm.zip` output. The output
+should be a visual design/spec for the WHMCS product detail page only. Do not
+generate implementation code.
 
 ---
 
@@ -11,6 +12,20 @@ implementation code.
 你是一名面向托管服务和云服务器产品的高级 SaaS / 客户控制台设计师。请为一个嵌入 WHMCS 客户区产品详情页的「腾讯云 CVM 管理面板」做 UI/UX 设计。设计目标不是营销落地页，而是客户日常管理自己云服务器的实用控制面板。
 
 这个页面会出现在 WHMCS 的单个产品/服务详情页中，不是独立应用，不要设计全屏 app shell，不要设计独立侧边栏，不要设计营销 hero。它应该像一个专业、紧凑、清晰的服务管理模块，可以被放入 WHMCS 主题内容区。
+
+## 第一版复审后的修正目标
+
+第一版已经覆盖了摘要、操作、弹窗、异步状态、错误态、移动版和数据来源标注。下一版请把重点从「设计说明展示页」收敛成「可直接作为实现依据的真实 WHMCS 客户产品页」。
+
+必须遵守:
+
+- 第一屏主画面必须就是客户实际会看到的 CVM 控制面板。
+- 不要在客户可见主画面顶部放大标题、教程文案、`Interactive panel`、`click any action`、编号章节、设计说明卡片或设计工具交付说明。
+- 不要输出模板占位符、伪代码、`{{ value }}`、`onClick`、状态变量名或代码式 props；所有字段使用真实但脱敏的样例数据。
+- 可以保留极少量 WHMCS 上下文，例如面包屑或服务状态条，但它只能像 WHMCS 主题的一部分，不能变成独立应用外壳。
+- 数据来源标注、设计说明、组件说明可以放在主画面右侧旁注或后续 handoff 画板里，不要让这些说明压过客户主界面。
+- 主界面背景应继承 WHMCS 内容区，使用白色/浅灰/透明中性背景；不要做整页灰色展示背景或全屏演示画布。
+- 默认桌面内容宽度按 WHMCS 内容区处理，约 900-1100px；移动版按 360-390px 宽度处理。
 
 ## 产品背景
 
@@ -178,11 +193,21 @@ VNC 控制台按钮应说明:
 
 请输出:
 
-1. 桌面版页面设计。
-2. 移动版页面设计。
+1. 桌面版主画面: 只展示客户实际会看到的 WHMCS 产品详情页内嵌 CVM 控制面板。
+2. 移动版主画面: 只展示客户实际会看到的移动端内嵌控制面板。
 3. 操作确认弹窗设计: Stop / Reboot / Reset Password / Reinstall OS。
 4. Pending / Failed / Suspended 三种状态示例。
-5. 组件标注: 哪些内容来自 WHMCS，哪些内容来自腾讯云 API，哪些内容来自模块本地数据库。
-6. 简短的设计说明，解释布局和风险分组。
+5. 错误/空状态示例: 创建中无公网 IP、腾讯云 API 暂不可用、信息同步失败、未配置模板或实例不存在。
+6. Handoff 标注画板: 哪些内容来自 WHMCS，哪些内容来自腾讯云 API，哪些内容来自模块本地数据库。
+7. 简短设计说明: 放在 handoff 区域，不要作为客户主画面的一部分，解释布局、风险分组、异步任务和禁用按钮规则。
+
+最终自检标准:
+
+- 看到第一屏时，应像一个真实 WHMCS 产品详情页模块，而不是设计作品说明页。
+- 普通、中风险、高风险操作必须一眼能分辨。
+- 进行中任务必须让冲突操作不可用，并给出最后更新时间和刷新入口。
+- 重装系统必须独立隔离，并要求输入实例名或 `REINSTALL`。
+- 任何错误、失败记录、日志、追踪 ID 都不能暴露 API Key、完整堆栈或内部路径。
+- 移动端不允许按钮文字、IP、实例 ID、状态标签溢出。
 
 不要输出代码。不要设计登录页。不要设计独立后台。不要设计营销首页。只设计 WHMCS 客户区产品详情页里的 CVM 控制面板。
