@@ -20,6 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Refined the client-area prompt after reviewing the first `docs/design/tx-cvm.zip` output, emphasizing a production-like WHMCS embedded module over a design-showcase page.
+- Reworked the client-area prompt for pure design AI output after reviewing `docs/design/tx-cvm 2`, limiting the next iteration to one customer-facing desktop main panel.
 
 ## [0.11] - 2026-06-16
 
