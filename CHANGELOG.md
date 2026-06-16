@@ -19,7 +19,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Tightened the admin addon prompt after reviewing the first Claude Design output, requiring visible template copy action, billing/disk fields, and confirmation before disabling templates.
+- Tightened the admin addon prompt after reviewing Claude Design outputs, requiring visible template copy action, billing/disk fields, confirmation before disabling templates, and no clipped row actions at 1280px width.
 
 ## [0.12] - 2026-06-16
 
