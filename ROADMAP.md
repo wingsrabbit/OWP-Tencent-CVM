@@ -192,6 +192,8 @@ Acceptance:
 
 ### v0.4 · Admin addon resource templates
 
+Status: current stacked PR.
+
 Deliverables:
 
 - API credential storage through WHMCS encrypted fields or module config helpers.

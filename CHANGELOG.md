@@ -10,6 +10,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.4] - 2026-06-16
+
+### Added
+
+- Added encrypted admin config storage through `ConfigStore` for Tencent Cloud credentials, endpoint, default region, timeout, and dry-run policy.
+- Added the WHMCS admin addon page controller for credentials, read-only connection testing, and resource template management.
+- Added resource template CRUD helpers backed by `mod_owp_tencentcvm_templates`.
+- Added admin-side create/update, enable/disable, and delete forms for sellable CVM templates.
+- Added read-only `DescribeInstances` credential test action.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, and install docs for the v0.4 admin resource management stage.
+- Kept WHMCS provisioning and lifecycle entrypoints returning readable "not implemented" messages, so template setup cannot automatically create or destroy CVMs.
+
 ## [0.3] - 2026-06-16
 
 ### Added
