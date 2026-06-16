@@ -49,6 +49,20 @@ final class Templates
     }
 
     /**
+     * @return null|array<string, mixed>
+     */
+    public static function find(int $id): ?array
+    {
+        self::assertId($id);
+
+        $row = Capsule::table(Schema::TEMPLATES_TABLE)
+            ->where('id', $id)
+            ->first();
+
+        return $row ? (array) $row : null;
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public static function save(array $data): int
@@ -76,6 +90,7 @@ final class Templates
             'system_disk_type' => trim((string) ($data['system_disk_type'] ?? 'CLOUD_BSSD')),
             'system_disk_size_gb' => max(20, (int) ($data['system_disk_size_gb'] ?? 50)),
             'validation_status' => 'not_checked',
+            'validation_message' => '',
             'updated_at' => $now,
         ];
 
@@ -108,6 +123,19 @@ final class Templates
         self::assertId($id);
 
         Capsule::table(Schema::TEMPLATES_TABLE)->where('id', $id)->delete();
+    }
+
+    public static function markValidation(int $id, string $status, string $message): void
+    {
+        self::assertId($id);
+
+        Capsule::table(Schema::TEMPLATES_TABLE)
+            ->where('id', $id)
+            ->update([
+                'validation_status' => $status,
+                'validation_message' => $message,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
     }
 
     /**

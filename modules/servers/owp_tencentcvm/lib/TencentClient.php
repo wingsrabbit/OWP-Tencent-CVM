@@ -86,6 +86,40 @@ final class TencentClient
         return $this->request('DescribeInstancesStatus', ['InstanceIds' => array_values($instanceIds)], $region);
     }
 
+    public function describeZones(string $region): TencentResponse
+    {
+        return $this->request('DescribeZones', [], $region);
+    }
+
+    /**
+     * @param list<string> $imageIds
+     */
+    public function describeImages(string $region, array $imageIds): TencentResponse
+    {
+        return $this->request('DescribeImages', ['ImageIds' => array_values($imageIds)], $region);
+    }
+
+    public function describeZoneInstanceConfigInfos(string $region): TencentResponse
+    {
+        return $this->request('DescribeZoneInstanceConfigInfos', [], $region);
+    }
+
+    /**
+     * @param list<string> $subnetIds
+     */
+    public function describeSubnets(string $region, array $subnetIds): TencentResponse
+    {
+        return $this->request('DescribeSubnets', ['SubnetIds' => array_values($subnetIds)], $region);
+    }
+
+    /**
+     * @param list<string> $securityGroupIds
+     */
+    public function describeSecurityGroups(string $region, array $securityGroupIds): TencentResponse
+    {
+        return $this->request('DescribeSecurityGroups', ['SecurityGroupIds' => array_values($securityGroupIds)], $region);
+    }
+
     /**
      * @param array<string, mixed> $params
      */

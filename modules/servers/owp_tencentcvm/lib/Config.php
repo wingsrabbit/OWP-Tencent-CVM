@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.4';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.41';
     }
 
     /**
@@ -53,7 +53,7 @@ final class Config
             'region' => isset($params['configoption2']) ? (string) $params['configoption2'] : '',
             'dryRun' => !empty($params['configoption3']),
             'statusLabel' => 'Module skeleton installed',
-            'notice' => 'Tencent Cloud CVM lifecycle operations are intentionally not wired in v0.4.',
+            'notice' => 'Tencent Cloud CVM lifecycle operations are intentionally not wired in v0.41.',
         ];
     }
 }
