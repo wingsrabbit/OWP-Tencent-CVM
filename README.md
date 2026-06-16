@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.12-blue)
+![version](https://img.shields.io/badge/version-v0.2-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,13 @@
 
 ## Status
 
-This repository is in the initial planning/bootstrap stage. The first implementation target is a WHMCS module suite:
+This repository is in the v0.2 module skeleton stage. It now contains the paired
+WHMCS server module and addon module layout, shared PHP library loader,
+idempotent addon table creation, and a minimal client-area placeholder.
+
+The Tencent Cloud API client is deliberately non-networked in v0.2. Provisioning
+and lifecycle actions return readable "not implemented" messages until the API
+foundation phase lands.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
@@ -58,10 +64,11 @@ The module should call Tencent Cloud API 3.0 directly with a small self-containe
 
 ---
 
-## Planned Directory Structure
+## Directory Structure
 
 ```text
 docs/
+  INSTALL.md
   design/
     client-area-prompt.md
 modules/
@@ -79,9 +86,12 @@ modules/
     owp_tencentcvm.php
 install/
   schema.sql
-docs/
-  INSTALL.md
 ```
+
+## Install
+
+See [docs/INSTALL.md](docs/INSTALL.md) for the manual WHMCS upload and
+activation checklist.
 
 ## Design Workflow
 
