@@ -10,6 +10,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.12] - 2026-06-16
+
+### Added
+
+- Added the client-area CVM control panel design prompt at `docs/design/client-area-prompt.md`.
+- Documented the external design-tool workflow in `README.md`.
+
 ## [0.11] - 2026-06-16
 
 ### Added

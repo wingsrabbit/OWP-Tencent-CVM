@@ -61,6 +61,9 @@ The module should call Tencent Cloud API 3.0 directly with a small self-containe
 ## Planned Directory Structure
 
 ```text
+docs/
+  design/
+    client-area-prompt.md
 modules/
   servers/owp_tencentcvm/
     owp_tencentcvm.php
@@ -79,6 +82,12 @@ install/
 docs/
   INSTALL.md
 ```
+
+## Design Workflow
+
+Customer and admin pages are designed with external design-tool prompts before
+implementation. The first prompt is available at
+[docs/design/client-area-prompt.md](docs/design/client-area-prompt.md).
 
 ---
 
