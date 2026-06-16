@@ -17,6 +17,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Added the Claude Design prompt for the WHMCS admin addon page at `docs/design/admin-addon-prompt.md`.
 - Linked both design prompts from `README.md`.
 
+### Changed
+
+- Tightened the admin addon prompt after reviewing the first Claude Design output, requiring visible template copy action, billing/disk fields, and confirmation before disabling templates.
+
 ## [0.12] - 2026-06-16
 
 ### Added
