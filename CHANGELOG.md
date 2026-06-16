@@ -15,6 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Added the Claude Design prompt for the WHMCS admin addon page at `docs/design/admin-addon-prompt.md`.
+- Added a shorter Claude Design revision prompt at `docs/design/admin-addon-revision-prompt.md` for iterative artifact fixes.
 - Linked both design prompts from `README.md`.
 
 ### Changed

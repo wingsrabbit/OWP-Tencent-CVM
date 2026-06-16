@@ -65,6 +65,7 @@ docs/
   design/
     client-area-prompt.md
     admin-addon-prompt.md
+    admin-addon-revision-prompt.md
 modules/
   servers/owp_tencentcvm/
     owp_tencentcvm.php
@@ -91,6 +92,11 @@ implementation:
 
 - [docs/design/client-area-prompt.md](docs/design/client-area-prompt.md)
 - [docs/design/admin-addon-prompt.md](docs/design/admin-addon-prompt.md)
+- [docs/design/admin-addon-revision-prompt.md](docs/design/admin-addon-revision-prompt.md)
+
+Use the full prompt for the first Claude Design artifact. For later iterations
+inside the same Claude Design conversation, use the revision prompt so Claude can
+modify the current artifact instead of rebuilding the page from scratch.
 
 ---
 
