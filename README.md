@@ -18,6 +18,8 @@ This repository is in the initial planning/bootstrap stage. The first implementa
 
 No Tencent Cloud credentials, WHMCS production values, customer data, or deployment secrets belong in this repository.
 
+See [ROADMAP.md](ROADMAP.md) for the staged implementation plan, PR/version rules, and design-prompt workflow.
+
 ---
 
 ## Target Features
