@@ -29,13 +29,25 @@
                     </tr>
                     <tr>
                         <th>Status</th>
-                        <td>{$statusLabel|escape}</td>
+                        <td>{$instance.state|default:$statusLabel|escape}</td>
+                    </tr>
+                    <tr>
+                        <th>Instance ID</th>
+                        <td>{$instance.instance_id|default:'not created'|escape}</td>
+                    </tr>
+                    <tr>
+                        <th>Public IP</th>
+                        <td>{$instance.public_ip|default:'pending'|escape}</td>
+                    </tr>
+                    <tr>
+                        <th>Private IP</th>
+                        <td>{$instance.private_ip|default:'pending'|escape}</td>
                     </tr>
                 </tbody>
             </table>
 
             <p class="text-muted">
-                Power controls, reinstall, password reset, VNC console, IPs, and operation history will be wired after the Tencent Cloud API client and instance persistence are implemented.
+                CreateAccount and read-only status sync are available. Power controls, reinstall, password reset, VNC console, and operation history will be wired in later lifecycle phases.
             </p>
         </div>
     </div>

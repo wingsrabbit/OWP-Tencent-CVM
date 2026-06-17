@@ -86,6 +86,14 @@ final class TencentClient
         return $this->request('DescribeInstancesStatus', ['InstanceIds' => array_values($instanceIds)], $region);
     }
 
+    /**
+     * @param list<string> $instanceIds
+     */
+    public function describeInstancesByIds(string $region, array $instanceIds): TencentResponse
+    {
+        return $this->request('DescribeInstances', ['InstanceIds' => array_values($instanceIds)], $region);
+    }
+
     public function describeZones(string $region): TencentResponse
     {
         return $this->request('DescribeZones', [], $region);

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OwpTencentCvm;
 
+use Throwable;
+use WHMCS\Database\Capsule;
+
 final class Operations
 {
     public static function notImplemented(string $operation, string $detail = ''): string
@@ -26,13 +29,58 @@ final class Operations
      */
     public static function clientArea(array $params): array
     {
+        $serviceId = Instances::serviceId($params);
+        $instance = $serviceId > 0 ? Instances::findByServiceId($serviceId) : null;
+
         return [
             'templatefile' => 'clientarea',
             'vars' => array_merge(
                 Config::clientAreaVariables($params),
-                ['instance' => Instances::placeholderFromParams($params)]
+                ['instance' => $instance ?? Instances::placeholderFromParams($params)]
             ),
         ];
+    }
+
+    public static function createAccount(array $params): string
+    {
+        try {
+            return (new Provisioner())->createAccount($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function syncInstanceStatus(array $params): string
+    {
+        try {
+            return (new Provisioner())->syncInstanceStatus($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function record(
+        int $serviceId,
+        ?int $templateId,
+        string $operation,
+        string $status,
+        string $message,
+        string $requestId = '',
+        string $actorType = 'system',
+        string $actor = ''
+    ): void {
+        Capsule::table(Schema::OPERATIONS_TABLE)->insert([
+            'service_id' => $serviceId > 0 ? $serviceId : null,
+            'template_id' => $templateId,
+            'operation' => $operation,
+            'actor_type' => $actorType,
+            'actor' => $actor !== '' ? $actor : null,
+            'status' => $status,
+            'request_id' => $requestId !== '' ? $requestId : null,
+            'message' => $message,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
     }
 
     /**
@@ -43,8 +91,8 @@ final class Operations
         return [
             'version' => Config::version(),
             'tables' => Schema::tables(),
-            'apiStatus' => 'Client available; credentials and lifecycle wiring are pending',
-            'liveCalls' => 'not invoked by WHMCS lifecycle entrypoints',
+            'apiStatus' => 'Client available; guarded CreateAccount and read-only status sync are wired',
+            'liveCalls' => 'CreateAccount is blocked by dry-run by default and requires a validated enabled template',
         ];
     }
 }
