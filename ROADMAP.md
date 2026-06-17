@@ -136,6 +136,8 @@ Acceptance:
 
 ### v0.2 · WHMCS module skeleton
 
+Status: current PR.
+
 Deliverables:
 
 - `modules/servers/owp_tencentcvm/owp_tencentcvm.php`

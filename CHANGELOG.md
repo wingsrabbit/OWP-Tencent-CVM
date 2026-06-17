@@ -10,6 +10,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2] - 2026-06-16
+
+### Added
+
+- Added the WHMCS server provisioning module skeleton at `modules/servers/owp_tencentcvm/owp_tencentcvm.php`.
+- Added the WHMCS admin addon module skeleton at `modules/addons/owp_tencentcvm/owp_tencentcvm.php`.
+- Added shared PHP library classes for loading, configuration, schema creation, template placeholders, instance placeholders, operations, and a non-networked Tencent client placeholder.
+- Added the minimal client-area Smarty template at `modules/servers/owp_tencentcvm/clientarea.tpl`.
+- Added idempotent database schema creation through `install/schema.sql` and the addon activation routine.
+- Added `docs/INSTALL.md` with the manual WHMCS upload and activation checklist.
+
+### Changed
+
+- Updated `README.md` and `VERSION` for the v0.2 module skeleton stage.
+- Kept all Tencent Cloud actions as readable "not implemented" responses so no live API calls can occur in this version.
+
 ## [0.13] - 2026-06-16
 
 ### Added
