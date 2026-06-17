@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 if (!defined('OWP_TENCENTCVM_VERSION')) {
-    define('OWP_TENCENTCVM_VERSION', '0.7.1');
+    define('OWP_TENCENTCVM_VERSION', '0.8.0');
 }
 
 require_once __DIR__ . '/Loader.php';

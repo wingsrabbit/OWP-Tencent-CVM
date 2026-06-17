@@ -10,6 +10,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-06-17
+
+### Added
+
+- Added automatic VPC, subnet, and security group create/reuse for templates with blank network IDs.
+- Added shared auto-resource config keys for VPC, subnet, and security group reuse.
+- Added Elastic IP and Anycast Elastic IP template modes with EIP allocation, association, address sync, and terminate-time release.
+- Added schema upgrade handling for nullable network IDs, public IP mode fields, Anycast/EIP settings, and stored EIP address IDs.
+- Added Tencent VPC and EIP client methods for network creation, security group policies, address allocation, association, disassociation, and release.
+
+### Changed
+
+- Updated `RunInstances` payloads so non-direct public IP modes disable direct public IP assignment before EIP association.
+- Updated dry-run results to clarify that no CVM, network resource, or EIP is created.
+- Updated template validation to allow blank VPC, subnet, and security group IDs and skip write-only auto-resource checks.
+- Updated Tencent API signing payload encoding so empty request payloads are sent as `{}` instead of `[]`.
+- Updated `README.md`, `VERSION`, install docs, release docs, CAM policy, and module version constants for v0.8.0.
+
 ## [0.7.1] - 2026-06-17
 
 ### Added

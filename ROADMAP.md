@@ -276,6 +276,25 @@ Acceptance:
 - Password reset handles running-instance force-stop requirements safely.
 - Unsupported package changes fail with a readable message instead of partial changes.
 
+### v0.8.0 · Automatic network and EIP modes
+
+Status: current PR.
+
+Deliverables:
+
+- Allow templates to leave VPC, subnet, and security group IDs blank.
+- Auto-create or reuse shared `owp-whmcs-auto-*` VPC, subnet, and security group resources.
+- Add direct public IP, Elastic IP, and Anycast Elastic IP template modes.
+- Store EIP address IDs and release associated EIPs before instance termination.
+- Keep dry-run limited to CVM dry-run validation with no real network or EIP mutations.
+
+Acceptance:
+
+- Existing WHMCS addon installations upgrade schema idempotently without dropping tables.
+- Blank network IDs validate as runtime auto-resource intent instead of failing read-only checks.
+- Non-direct public IP modes run `RunInstances` with direct public IP assignment disabled.
+- TerminateAccount releases recorded EIPs before calling `TerminateInstances`.
+
 ---
 
 ## Phase 5 · Client Area

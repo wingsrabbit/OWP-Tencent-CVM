@@ -112,6 +112,9 @@ final class AdminPage
             'security_group_id' => trim((string) ($_POST['security_group_id'] ?? '')),
             'bandwidth_mbps' => (int) ($_POST['bandwidth_mbps'] ?? 1),
             'charge_type' => trim((string) ($_POST['charge_type'] ?? 'POSTPAID_BY_HOUR')),
+            'public_ip_mode' => trim((string) ($_POST['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT)),
+            'anycast_zone' => trim((string) ($_POST['anycast_zone'] ?? Templates::DEFAULT_ANYCAST_ZONE)),
+            'eip_internet_charge_type' => trim((string) ($_POST['eip_internet_charge_type'] ?? Templates::DEFAULT_EIP_CHARGE_TYPE)),
             'system_disk_type' => trim((string) ($_POST['system_disk_type'] ?? 'CLOUD_BSSD')),
             'system_disk_size_gb' => (int) ($_POST['system_disk_size_gb'] ?? 50),
         ]);
@@ -234,11 +237,21 @@ final class AdminPage
         $html .= $this->input('Zone', 'zone', 'ap-guangzhou-3');
         $html .= $this->input('Instance Type', 'instance_type', 'S5.MEDIUM4');
         $html .= $this->input('Image ID', 'image_id', 'img-placeholder');
-        $html .= $this->input('VPC ID', 'vpc_id', 'vpc-placeholder');
-        $html .= $this->input('Subnet ID', 'subnet_id', 'subnet-placeholder');
-        $html .= $this->input('Security Group ID', 'security_group_id', 'sg-placeholder');
+        $html .= $this->input('VPC ID', 'vpc_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto VPC');
+        $html .= $this->input('Subnet ID', 'subnet_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto subnet');
+        $html .= $this->input('Security Group ID', 'security_group_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto security group');
         $html .= $this->input('Bandwidth Mbps', 'bandwidth_mbps', '5', '', 'number');
         $html .= $this->input('Charge Type', 'charge_type', 'POSTPAID_BY_HOUR');
+        $html .= $this->select('Public IP Mode', 'public_ip_mode', Templates::PUBLIC_IP_DIRECT, [
+            Templates::PUBLIC_IP_DIRECT => 'Direct public IP',
+            Templates::PUBLIC_IP_EIP => 'Elastic IP',
+            Templates::PUBLIC_IP_ANYCAST_EIP => 'Anycast Elastic IP',
+        ]);
+        $html .= $this->input('Anycast Zone', 'anycast_zone', Templates::DEFAULT_ANYCAST_ZONE, 'Used only when Public IP Mode is Anycast Elastic IP');
+        $html .= $this->select('EIP Internet Charge Type', 'eip_internet_charge_type', Templates::DEFAULT_EIP_CHARGE_TYPE, [
+            'TRAFFIC_POSTPAID_BY_HOUR' => 'TRAFFIC_POSTPAID_BY_HOUR',
+            'BANDWIDTH_POSTPAID_BY_HOUR' => 'BANDWIDTH_POSTPAID_BY_HOUR',
+        ]);
         $html .= $this->input('System Disk Type', 'system_disk_type', 'CLOUD_BSSD');
         $html .= $this->input('System Disk Size GB', 'system_disk_size_gb', '50', '', 'number');
         $html .= '<button type="submit" class="btn btn-primary">Save Template</button>';
@@ -272,7 +285,8 @@ final class AdminPage
             $html .= '<td>' . $this->escape((string) $template['region']) . '<br><small>' . $this->escape((string) $template['zone']) . '</small></td>';
             $html .= '<td>' . $this->escape((string) $template['instance_type']) . '</td>';
             $html .= '<td>' . $this->escape((string) $template['image_id']) . '</td>';
-            $html .= '<td>' . $this->escape((string) $template['vpc_id']) . '<br><small>' . $this->escape((string) $template['subnet_id']) . ' / ' . $this->escape((string) $template['security_group_id']) . '</small></td>';
+            $network = $this->networkSummary($template);
+            $html .= '<td>' . $network . '<br><small>IP: ' . $this->escape((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT)) . '</small></td>';
             $html .= '<td>' . $this->escape((string) $template['system_disk_type']) . '<br><small>' . $this->escape((string) $template['system_disk_size_gb']) . ' GB</small></td>';
             $html .= '<td>' . $this->validationBadge((string) ($template['validation_status'] ?? 'not_checked'), (string) ($template['validation_message'] ?? '')) . '</td>';
             $html .= '<td>' . $this->rowActions($moduleLink, (int) $template['id'], !$enabled) . '</td>';
@@ -336,6 +350,40 @@ final class AdminPage
         $html .= '</div>';
 
         return $html;
+    }
+
+    /**
+     * @param array<string, string> $options
+     */
+    private function select(string $label, string $name, string $value, array $options): string
+    {
+        $html = '<div class="form-group">';
+        $html .= '<label>' . $this->escape($label) . '</label>';
+        $html .= '<select class="form-control" name="' . $this->escape($name) . '">';
+        foreach ($options as $optionValue => $optionLabel) {
+            $selected = $optionValue === $value ? ' selected' : '';
+            $html .= '<option value="' . $this->escape($optionValue) . '"' . $selected . '>' . $this->escape($optionLabel) . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * @param array<string, mixed> $template
+     */
+    private function networkSummary(array $template): string
+    {
+        $vpcId = trim((string) ($template['vpc_id'] ?? ''));
+        $subnetId = trim((string) ($template['subnet_id'] ?? ''));
+        $securityGroupId = trim((string) ($template['security_group_id'] ?? ''));
+
+        $vpcLabel = $vpcId !== '' ? $vpcId : 'auto VPC';
+        $subnetLabel = $subnetId !== '' ? $subnetId : 'auto subnet';
+        $securityGroupLabel = $securityGroupId !== '' ? $securityGroupId : 'auto SG';
+
+        return $this->escape($vpcLabel) . '<br><small>' . $this->escape($subnetLabel . ' / ' . $securityGroupLabel) . '</small>';
     }
 
     private function csrfField(): string

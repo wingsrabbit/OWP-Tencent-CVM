@@ -1,8 +1,9 @@
 # Install Guide
 
-OWP Tencent CVM v0.7.1 is a WHMCS module with a bundled Tencent Cloud API client,
+OWP Tencent CVM v0.8.0 is a WHMCS module with a bundled Tencent Cloud API client,
 encrypted credential storage, admin-side resource templates, read-only template
-validation, guarded CreateAccount provisioning, guarded service lifecycle
+validation, automatic VPC/subnet/security-group reuse, direct EIP and Anycast
+EIP modes, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, package-change rejection, and read-only status
 sync. It also includes the customer-facing CVM control panel under the WHMCS
 product detail page.
@@ -33,9 +34,9 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.7.1` in the module metadata.
+4. Confirm the admin page shows version `0.8.0` in the module metadata.
 5. Save credentials and create at least one resource template.
-6. Use `Validate` on each template to check zone, image, instance type, subnet, security group, and bandwidth policy before enabling sales.
+6. Use `Validate` on each template to check zone, image, instance type, fixed subnet, fixed security group, public IP mode, and bandwidth policy before enabling sales. Blank VPC, subnet, or security group fields are skipped during validation and auto-created or reused during provisioning.
 
 ## Product Module
 
@@ -48,10 +49,17 @@ WHMCS Capsule database layer.
 4. Save the product.
 
 CreateAccount requires the selected admin template to be enabled and validated
-as `valid`. Dry-run is enabled by default and blocks CreateAccount, suspend,
-unsuspend, and terminate API calls, so no billable or state-changing Tencent
-Cloud action is made until dry-run is explicitly disabled for the product and
-addon settings.
+as `valid`. Dry-run is enabled by default and blocks live CreateAccount,
+suspend, unsuspend, and terminate API calls. CreateAccount may still send
+Tencent `RunInstances` with `DryRun = true`, but no billable or state-changing
+Tencent Cloud action is made until dry-run is explicitly disabled for the
+product and addon settings.
+
+For resource templates, VPC ID, Subnet ID, and Security Group ID can be left
+blank. In live provisioning, the module auto-creates or reuses shared
+`owp-whmcs-auto-*` VPC, subnet, and security group resources and stores their
+IDs in the addon config table. In dry-run, those network and EIP resources are
+not created.
 
 TerminateAccount has an additional addon safety checkbox and remains blocked
 unless `Allow destructive TerminateAccount API calls` is explicitly enabled.

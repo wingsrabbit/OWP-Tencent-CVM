@@ -37,6 +37,7 @@ final class TemplateValidator
         $this->checkSubnet($vpc, $template, $messages, $status);
         $this->checkSecurityGroup($vpc, $template, $messages, $status);
         $this->checkBandwidth($template, $messages, $status);
+        $this->checkPublicIpSettings($template, $messages, $status);
 
         $message = implode(' ', $messages);
         Templates::markValidation($templateId, $status, $message);
@@ -134,7 +135,23 @@ final class TemplateValidator
      */
     private function checkSubnet(TencentClient $client, array $template, array &$messages, string &$status): void
     {
-        $response = $client->describeSubnets((string) $template['region'], [(string) $template['subnet_id']]);
+        $vpcId = trim((string) ($template['vpc_id'] ?? ''));
+        $subnetId = trim((string) ($template['subnet_id'] ?? ''));
+
+        if ($subnetId === '') {
+            $messages[] = $vpcId === ''
+                ? 'VPC and subnet will be auto-created or reused at provisioning; subnet validation skipped.'
+                : 'Subnet will be auto-created or reused at provisioning; subnet validation skipped.';
+            return;
+        }
+
+        if ($vpcId === '') {
+            $status = 'invalid';
+            $messages[] = 'VPC ID is required when a fixed subnet ID is provided.';
+            return;
+        }
+
+        $response = $client->describeSubnets((string) $template['region'], [$subnetId]);
         $subnets = $response->data()['SubnetSet'] ?? [];
 
         if (!is_array($subnets) || count($subnets) === 0) {
@@ -144,7 +161,7 @@ final class TemplateValidator
         }
 
         $subnet = is_array($subnets[0] ?? null) ? $subnets[0] : [];
-        if (($subnet['VpcId'] ?? $template['vpc_id']) !== $template['vpc_id']) {
+        if (($subnet['VpcId'] ?? $vpcId) !== $vpcId) {
             $status = 'invalid';
             $messages[] = 'Subnet VPC mismatch.';
             return;
@@ -165,7 +182,13 @@ final class TemplateValidator
      */
     private function checkSecurityGroup(TencentClient $client, array $template, array &$messages, string &$status): void
     {
-        $response = $client->describeSecurityGroups((string) $template['region'], [(string) $template['security_group_id']]);
+        $securityGroupId = trim((string) ($template['security_group_id'] ?? ''));
+        if ($securityGroupId === '') {
+            $messages[] = 'Security group will be auto-created or reused at provisioning; security group validation skipped.';
+            return;
+        }
+
+        $response = $client->describeSecurityGroups((string) $template['region'], [$securityGroupId]);
         $groups = $response->data()['SecurityGroupSet'] ?? [];
 
         if (is_array($groups) && count($groups) > 0) {
@@ -192,6 +215,37 @@ final class TemplateValidator
 
         $status = $status === 'invalid' ? $status : 'warning';
         $messages[] = 'Bandwidth is outside the conservative 1-1000 Mbps policy range.';
+    }
+
+    /**
+     * @param array<string, mixed> $template
+     * @param list<string> $messages
+     */
+    private function checkPublicIpSettings(array $template, array &$messages, string &$status): void
+    {
+        $mode = Templates::publicIpMode((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT));
+        if ($mode !== (string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT)) {
+            $status = 'invalid';
+            $messages[] = 'Public IP mode is invalid.';
+            return;
+        }
+
+        $chargeType = Templates::eipInternetChargeType((string) ($template['eip_internet_charge_type'] ?? Templates::DEFAULT_EIP_CHARGE_TYPE));
+        if ($chargeType !== (string) ($template['eip_internet_charge_type'] ?? Templates::DEFAULT_EIP_CHARGE_TYPE)) {
+            $status = 'invalid';
+            $messages[] = 'EIP internet charge type is invalid.';
+            return;
+        }
+
+        if ($mode === Templates::PUBLIC_IP_ANYCAST_EIP && trim((string) ($template['anycast_zone'] ?? '')) === '') {
+            $status = 'invalid';
+            $messages[] = 'Anycast zone is required for Anycast Elastic IP mode.';
+            return;
+        }
+
+        $messages[] = $mode === Templates::PUBLIC_IP_DIRECT
+            ? 'Direct public IP mode OK.'
+            : 'EIP mode OK; allocation is deferred until provisioning.';
     }
 
     /**

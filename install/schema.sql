@@ -17,11 +17,14 @@ CREATE TABLE IF NOT EXISTS `mod_owp_tencentcvm_templates` (
   `zone` VARCHAR(80) NOT NULL,
   `instance_type` VARCHAR(100) NOT NULL,
   `image_id` VARCHAR(100) NOT NULL,
-  `vpc_id` VARCHAR(100) NOT NULL,
-  `subnet_id` VARCHAR(100) NOT NULL,
-  `security_group_id` VARCHAR(100) NOT NULL,
+  `vpc_id` VARCHAR(100) NULL,
+  `subnet_id` VARCHAR(100) NULL,
+  `security_group_id` VARCHAR(100) NULL,
   `bandwidth_mbps` INT NOT NULL DEFAULT 1,
   `charge_type` VARCHAR(60) NOT NULL DEFAULT 'POSTPAID_BY_HOUR',
+  `public_ip_mode` VARCHAR(40) NOT NULL DEFAULT 'direct',
+  `anycast_zone` VARCHAR(80) NOT NULL DEFAULT 'ANYCAST_ZONE_OVERSEAS',
+  `eip_internet_charge_type` VARCHAR(80) NOT NULL DEFAULT 'TRAFFIC_POSTPAID_BY_HOUR',
   `system_disk_type` VARCHAR(60) NOT NULL DEFAULT 'CLOUD_BSSD',
   `system_disk_size_gb` INT NOT NULL DEFAULT 50,
   `validation_status` VARCHAR(40) NOT NULL DEFAULT 'not_checked',
@@ -37,6 +40,7 @@ CREATE TABLE IF NOT EXISTS `mod_owp_tencentcvm_instances` (
   `service_id` INT NOT NULL,
   `template_id` INT UNSIGNED NULL,
   `instance_id` VARCHAR(100) NULL,
+  `eip_address_id` VARCHAR(100) NULL,
   `region` VARCHAR(40) NULL,
   `zone` VARCHAR(80) NULL,
   `public_ip` VARCHAR(100) NULL,
@@ -47,7 +51,8 @@ CREATE TABLE IF NOT EXISTS `mod_owp_tencentcvm_instances` (
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_service_id` (`service_id`),
-  KEY `idx_instance_id` (`instance_id`)
+  KEY `idx_instance_id` (`instance_id`),
+  KEY `idx_eip_address_id` (`eip_address_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `mod_owp_tencentcvm_operations` (

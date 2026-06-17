@@ -99,9 +99,21 @@ final class LifecycleManager
             return 'TerminateAccount is blocked. Enable the addon safety setting only when destructive Tencent CVM termination is intended.';
         }
 
+        $region = $this->region($params, $instance);
+        $eipAddressId = trim((string) ($instance['eip_address_id'] ?? ''));
+        if ($eipAddressId !== '') {
+            try {
+                (new ElasticIpManager($this->configStore))->releaseAddress($serviceId, $templateId, $region, $eipAddressId);
+            } catch (TencentApiException $exception) {
+                return $this->recordFailure($serviceId, $templateId, 'ReleaseAddresses', $exception->getMessage(), $exception->requestId());
+            } catch (Throwable $exception) {
+                return $this->recordFailure($serviceId, $templateId, 'ReleaseAddresses', $exception->getMessage());
+            }
+        }
+
         $client = new TencentClient($this->configStore->apiSettings());
         try {
-            $response = $client->terminateInstances($this->region($params, $instance), [$instanceId]);
+            $response = $client->terminateInstances($region, [$instanceId]);
         } catch (TencentApiException $exception) {
             return $this->recordFailure($serviceId, $templateId, 'TerminateAccount', $exception->getMessage(), $exception->requestId());
         } catch (Throwable $exception) {

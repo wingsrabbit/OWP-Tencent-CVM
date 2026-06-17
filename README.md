@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.7.1-blue)
+![version](https://img.shields.io/badge/version-v0.8.0-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.7.1 CSRF hardening stage. It now contains
+This repository is in the v0.8.0 automatic network and EIP stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
@@ -24,7 +24,10 @@ policy, read-only status sync, and a customer-facing control panel modeled from
 the accepted design. Release-package docs now cover manual WHMCS upload,
 operator checklists, and a starter Tencent Cloud CAM policy. Reinstall remains
 blocked until a later explicit policy switch. Customer and admin POST actions
-include module-owned CSRF tokens.
+include module-owned CSRF tokens. Resource templates can leave VPC, subnet, and
+security group IDs blank so the module can auto-create or reuse shared
+`owp-whmcs-auto-*` network resources at provisioning time. Templates can also
+choose direct public IP, Elastic IP, or Anycast Elastic IP modes.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
@@ -39,10 +42,10 @@ See [ROADMAP.md](ROADMAP.md) for the staged implementation plan, PR/version rule
 
 | Area | Scope |
 |------|-------|
-| Provisioning | Create Tencent Cloud CVM instances after paid WHMCS orders, store `InstanceId`, public IPs, region, image, and template metadata. |
+| Provisioning | Create Tencent Cloud CVM instances after paid WHMCS orders, store `InstanceId`, EIP IDs, public IPs, region, image, and template metadata. |
 | Lifecycle | Start, stop, reboot, reset password, suspend, unsuspend, terminate, and poll async operation status. |
 | Client area | Product-detail page controls for power actions, password reset, VNC/console link, instance status, IPs, and operation history. |
-| Admin addon | Configure Tencent Cloud API credentials, regions, zones, instance templates, images, VPC/subnet/security group policy, dry-run mode, and module logs. |
+| Admin addon | Configure Tencent Cloud API credentials, regions, zones, instance templates, images, optional VPC/subnet/security group IDs, public IP mode, dry-run mode, and module logs. |
 | Safety | CAM least-privilege credentials, no hardcoded secrets, idempotent create flow, operation audit log, destructive-action confirmation. |
 | Packaging | Public white-label package following the ONC-style README, VERSION, CHANGELOG, and MIT license pattern. |
 
@@ -92,7 +95,9 @@ modules/
       ConfigStore.php
       CsrfGuard.php
       ClientAreaController.php
+      ElasticIpManager.php
       LifecycleManager.php
+      NetworkResourceManager.php
       Provisioner.php
       TemplateValidator.php
       TencentClient.php

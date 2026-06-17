@@ -1,6 +1,6 @@
 # Tencent Cloud CAM Policy
 
-This is a starter CAM policy for OWP Tencent CVM v0.7.1. Review it in Tencent
+This is a starter CAM policy for OWP Tencent CVM v0.8.0. Review it in Tencent
 Cloud CAM before production use. Tencent Cloud recommends using the policy
 generator for custom policies, and the CAM policy language is JSON-based with
 `version`, `statement`, `action`, `resource`, and `effect` fields.
@@ -29,8 +29,10 @@ authorization for a specific action, prefer the narrower resource scope.
         "cvm:DescribeZones",
         "cvm:DescribeImages",
         "cvm:DescribeZoneInstanceConfigInfos",
+        "vpc:DescribeVpcs",
         "vpc:DescribeSubnets",
-        "vpc:DescribeSecurityGroups"
+        "vpc:DescribeSecurityGroups",
+        "vpc:DescribeAddresses"
       ],
       "resource": "*"
     },
@@ -42,7 +44,15 @@ authorization for a specific action, prefer the narrower resource scope.
         "cvm:StopInstances",
         "cvm:RebootInstances",
         "cvm:ResetInstancesPassword",
-        "cvm:DescribeInstanceVncUrl"
+        "cvm:DescribeInstanceVncUrl",
+        "vpc:CreateVpc",
+        "vpc:CreateSubnet",
+        "vpc:CreateSecurityGroup",
+        "vpc:CreateSecurityGroupPolicies",
+        "vpc:AllocateAddresses",
+        "vpc:AssociateAddress",
+        "vpc:DisassociateAddress",
+        "vpc:ReleaseAddresses"
       ],
       "resource": "*"
     }
@@ -66,13 +76,12 @@ operator has a rollback plan.
 }
 ```
 
-## Not Required In v0.7.1
+## Not Required In v0.8.0
 
 Do not grant these actions for the current module:
 
 - `cvm:ResetInstance` or other reinstall/reimage APIs
-- security group mutation APIs
-- VPC, subnet, or route table mutation APIs
+- route table mutation APIs
 - image creation/deletion APIs
 - disk snapshot or disk mutation APIs
 

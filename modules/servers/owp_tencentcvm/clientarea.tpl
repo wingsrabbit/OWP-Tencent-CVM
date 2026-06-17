@@ -186,7 +186,7 @@
         <details class="owp-cvm-details owp-cvm-details-danger">
             <summary><span>Dangerous Operations</span><span>expand</span></summary>
             <div class="owp-cvm-details-body">
-                <p class="owp-cvm-help">Reinstall is intentionally isolated and blocked in v0.7.1. Future support will require an admin policy switch and typed confirmation.</p>
+                <p class="owp-cvm-help">Reinstall is intentionally isolated and blocked in v0.8.0. Future support will require an admin policy switch and typed confirmation.</p>
                 <form method="post">
                     <input type="hidden" name="owp_client_action" value="reinstall">
                     <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">

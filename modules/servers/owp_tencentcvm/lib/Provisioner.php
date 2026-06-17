@@ -31,6 +31,11 @@ final class Provisioner
         $existing = Instances::findByServiceId($serviceId);
 
         if ($existing !== null && (string) ($existing['instance_id'] ?? '') !== '') {
+            if ($this->needsElasticIp($template, $existing, $dryRun)) {
+                $this->assertTemplateCanProvision($template);
+                return $this->ensureElasticIpForExistingInstance($serviceId, $template, $existing);
+            }
+
             Operations::record($serviceId, (int) $template['id'], 'CreateAccount', 'skipped', 'Existing Tencent CVM instance already recorded.');
             return 'success';
         }
@@ -46,10 +51,10 @@ final class Provisioner
             'template_snapshot' => $snapshot,
         ]);
 
-        $client = new TencentClient($this->configStore->apiSettings());
-        $payload = $this->buildRunInstancesPayload($serviceId, $template);
-
         try {
+            $network = (new NetworkResourceManager($this->configStore))->resolve($serviceId, (int) $template['id'], $template, $dryRun);
+            $client = new TencentClient($this->configStore->apiSettings());
+            $payload = $this->buildRunInstancesPayload($serviceId, $template, $network);
             $response = $client->runInstances((string) $template['region'], $payload, $dryRun);
         } catch (TencentApiException $exception) {
             if ($dryRun && $this->isDryRunSuccess($exception)) {
@@ -80,6 +85,21 @@ final class Provisioner
         ]);
         Operations::record($serviceId, (int) $template['id'], 'CreateAccount', 'success', 'RunInstances accepted instance ' . $instanceId . '.', $response->requestId());
 
+        if (Templates::publicIpMode((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT)) !== Templates::PUBLIC_IP_DIRECT) {
+            try {
+                $eip = (new ElasticIpManager($this->configStore))->ensureAssociated($serviceId, (int) $template['id'], $template, $instanceId);
+                Instances::upsertForService($serviceId, [
+                    'template_id' => (int) $template['id'],
+                    'eip_address_id' => $eip['address_id'],
+                    'public_ip' => $eip['public_ip'],
+                ]);
+            } catch (TencentApiException $exception) {
+                return $this->recordFailure($serviceId, (int) $template['id'], 'AssociateAddress', $exception->getMessage(), $exception->requestId());
+            } catch (Throwable $exception) {
+                return $this->recordFailure($serviceId, (int) $template['id'], 'AssociateAddress', $exception->getMessage());
+            }
+        }
+
         try {
             $this->syncByInstanceId($serviceId, $instanceId, (string) $template['region']);
         } catch (Throwable $exception) {
@@ -106,6 +126,48 @@ final class Provisioner
         }
 
         $this->syncByInstanceId($serviceId, (string) $instance['instance_id'], $region);
+
+        return 'success';
+    }
+
+    /**
+     * @param array<string, mixed> $template
+     * @param array<string, mixed> $existing
+     */
+    private function needsElasticIp(array $template, array $existing, bool $dryRun): bool
+    {
+        if ($dryRun) {
+            return false;
+        }
+
+        $mode = Templates::publicIpMode((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT));
+
+        return $mode !== Templates::PUBLIC_IP_DIRECT && trim((string) ($existing['eip_address_id'] ?? '')) === '';
+    }
+
+    /**
+     * @param array<string, mixed> $template
+     * @param array<string, mixed> $existing
+     */
+    private function ensureElasticIpForExistingInstance(int $serviceId, array $template, array $existing): string
+    {
+        $templateId = (int) $template['id'];
+        $instanceId = (string) ($existing['instance_id'] ?? '');
+
+        try {
+            $eip = (new ElasticIpManager($this->configStore))->ensureAssociated($serviceId, $templateId, $template, $instanceId);
+            Instances::upsertForService($serviceId, [
+                'template_id' => $templateId,
+                'eip_address_id' => $eip['address_id'],
+                'public_ip' => $eip['public_ip'],
+            ]);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'AssociateAddress', $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'AssociateAddress', $exception->getMessage());
+        }
+
+        Operations::record($serviceId, $templateId, 'CreateAccount', 'success', 'Existing Tencent CVM instance received its configured EIP.');
 
         return 'success';
     }
@@ -150,11 +212,13 @@ final class Provisioner
 
     /**
      * @param array<string, mixed> $template
+     * @param array{vpc_id:string, subnet_id:string, security_group_id:string, auto_network:bool} $network
      * @return array<string, mixed>
      */
-    private function buildRunInstancesPayload(int $serviceId, array $template): array
+    private function buildRunInstancesPayload(int $serviceId, array $template, array $network): array
     {
-        return [
+        $publicIpMode = Templates::publicIpMode((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT));
+        $payload = [
             'ClientToken' => $this->clientToken($serviceId, (int) $template['id']),
             'InstanceCount' => 1,
             'InstanceChargeType' => (string) $template['charge_type'],
@@ -164,17 +228,10 @@ final class Provisioner
             'Placement' => [
                 'Zone' => (string) $template['zone'],
             ],
-            'VirtualPrivateCloud' => [
-                'VpcId' => (string) $template['vpc_id'],
-                'SubnetId' => (string) $template['subnet_id'],
-            ],
-            'SecurityGroupIds' => [
-                (string) $template['security_group_id'],
-            ],
             'InternetAccessible' => [
                 'InternetChargeType' => 'TRAFFIC_POSTPAID_BY_HOUR',
                 'InternetMaxBandwidthOut' => (int) $template['bandwidth_mbps'],
-                'PublicIpAssigned' => true,
+                'PublicIpAssigned' => $publicIpMode === Templates::PUBLIC_IP_DIRECT,
             ],
             'SystemDisk' => [
                 'DiskType' => (string) $template['system_disk_type'],
@@ -185,6 +242,19 @@ final class Provisioner
                 'MonitorService' => ['Enabled' => true],
             ],
         ];
+
+        if ($network['vpc_id'] !== '' && $network['subnet_id'] !== '') {
+            $payload['VirtualPrivateCloud'] = [
+                'VpcId' => $network['vpc_id'],
+                'SubnetId' => $network['subnet_id'],
+            ];
+        }
+
+        if ($network['security_group_id'] !== '') {
+            $payload['SecurityGroupIds'] = [$network['security_group_id']];
+        }
+
+        return $payload;
     }
 
     private function clientToken(int $serviceId, int $templateId): string
@@ -203,9 +273,9 @@ final class Provisioner
             'template_id' => $templateId,
             'state' => 'dry_run_validated',
         ]);
-        Operations::record($serviceId, $templateId, 'CreateAccount', 'dry_run', 'Dry-run validation succeeded; no Tencent CVM was created.', $requestId);
+        Operations::record($serviceId, $templateId, 'CreateAccount', 'dry_run', 'Dry-run validation succeeded; no Tencent CVM, network resource, or EIP was created.', $requestId);
 
-        return 'Dry-run validation succeeded; no Tencent CVM was created. Disable dry-run only when this WHMCS product is ready to provision billable CVMs.';
+        return 'Dry-run validation succeeded; no Tencent CVM, network resource, or EIP was created. Disable dry-run only when this WHMCS product is ready to provision billable CVMs.';
     }
 
     private function recordFailure(int $serviceId, int $templateId, string $operation, string $message, string $requestId = ''): string
@@ -232,6 +302,9 @@ final class Provisioner
 
     private function syncByInstanceId(int $serviceId, string $instanceId, string $region): void
     {
+        $recorded = Instances::findByServiceId($serviceId);
+        $eipAddressId = trim((string) ($recorded['eip_address_id'] ?? ''));
+        $templateId = isset($recorded['template_id']) && (int) $recorded['template_id'] > 0 ? (int) $recorded['template_id'] : null;
         $client = new TencentClient($this->configStore->apiSettings());
         $response = $client->describeInstancesByIds($region, [$instanceId]);
         $instances = $response->data()['InstanceSet'] ?? [];
@@ -247,6 +320,13 @@ final class Provisioner
         }
 
         Instances::updateFromTencentInstance($serviceId, $instances[0], $region);
+        if ($eipAddressId !== '') {
+            $publicIp = (new ElasticIpManager($this->configStore))->publicIpForAddress($region, $eipAddressId, $serviceId, $templateId);
+            Instances::upsertForService($serviceId, [
+                'eip_address_id' => $eipAddressId,
+                'public_ip' => $publicIp,
+            ]);
+        }
         Operations::record($serviceId, null, 'SyncInstanceStatus', 'success', 'Tencent CVM instance status synchronized.', $response->requestId());
     }
 
