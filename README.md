@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.5-blue)
+![version](https://img.shields.io/badge/version-v0.51-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,16 +11,17 @@
 
 ## Status
 
-This repository is in the v0.5 guarded CreateAccount stage. It now contains
+This repository is in the v0.51 guarded service lifecycle stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a minimal client-area placeholder, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
 admin-side sellable template CRUD with read-only template validation.
 
 CreateAccount is wired with dry-run enabled by default, validated-template
-gating, Tencent `ClientToken` idempotency, instance persistence, and read-only
-status sync. Power, password, console, package, suspend, and terminate actions
-still return readable "not implemented" messages.
+gating, Tencent `ClientToken` idempotency, instance persistence, guarded
+suspend/unsuspend/terminate, and read-only status sync. Customer power,
+password, console, and package-change actions still return readable
+"not implemented" messages.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
@@ -84,6 +85,7 @@ modules/
     lib/
       AdminPage.php
       ConfigStore.php
+      LifecycleManager.php
       Provisioner.php
       TemplateValidator.php
       TencentClient.php

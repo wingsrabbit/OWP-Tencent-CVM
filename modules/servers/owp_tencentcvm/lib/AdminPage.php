@@ -66,6 +66,7 @@ final class AdminPage
         $this->configStore->set('default_region', trim((string) ($_POST['default_region'] ?? 'ap-guangzhou')));
         $this->configStore->set('endpoint', trim((string) ($_POST['endpoint'] ?? 'cvm.tencentcloudapi.com')));
         $this->configStore->setBool('dry_run', !empty($_POST['dry_run']));
+        $this->configStore->setBool('allow_terminate', !empty($_POST['allow_terminate']));
         $this->configStore->set('timeout_seconds', (string) max(1, (int) ($_POST['timeout_seconds'] ?? 20)), 'int');
 
         return ['type' => 'success', 'text' => 'Credentials and safety settings saved. Blank secret fields were left unchanged.'];
@@ -183,6 +184,7 @@ final class AdminPage
         $endpoint = $this->configStore->get('endpoint', 'cvm.tencentcloudapi.com');
         $timeout = $this->configStore->get('timeout_seconds', '20');
         $dryRunChecked = $this->configStore->bool('dry_run', true) ? ' checked' : '';
+        $allowTerminateChecked = $this->configStore->bool('allow_terminate', false) ? ' checked' : '';
 
         $html = '<div class="panel panel-default card">';
         $html .= '<div class="panel-heading card-header"><strong>Credentials And Safety</strong></div>';
@@ -196,6 +198,7 @@ final class AdminPage
         $html .= $this->input('Endpoint', 'endpoint', $endpoint);
         $html .= $this->input('Timeout Seconds', 'timeout_seconds', $timeout, '', 'number');
         $html .= '<div class="checkbox"><label><input type="checkbox" name="dry_run" value="1"' . $dryRunChecked . '> Keep Dry-run enabled by default</label></div>';
+        $html .= '<div class="checkbox"><label><input type="checkbox" name="allow_terminate" value="1"' . $allowTerminateChecked . '> Allow destructive TerminateAccount API calls</label></div>';
         $html .= '<button type="submit" class="btn btn-primary">Save Settings</button>';
         $html .= '</form>';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '" style="margin-top:10px">';

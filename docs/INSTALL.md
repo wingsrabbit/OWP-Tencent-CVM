@@ -1,8 +1,9 @@
 # Install Guide
 
-OWP Tencent CVM v0.5 is a WHMCS module with a bundled Tencent Cloud API client,
+OWP Tencent CVM v0.51 is a WHMCS module with a bundled Tencent Cloud API client,
 encrypted credential storage, admin-side resource templates, read-only template
-validation, guarded CreateAccount provisioning, and read-only status sync.
+validation, guarded CreateAccount provisioning, guarded service lifecycle
+actions, and read-only status sync.
 
 ## What To Upload
 
@@ -27,7 +28,7 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.5` in the module metadata.
+4. Confirm the admin page shows version `0.51` in the module metadata.
 5. Save credentials and create at least one resource template before later provisioning phases.
 6. Use `Validate` on each template to check zone, image, instance type, subnet, security group, and bandwidth policy before enabling sales.
 
@@ -42,12 +43,16 @@ WHMCS Capsule database layer.
 4. Save the product.
 
 CreateAccount requires the selected admin template to be enabled and validated
-as `valid`. Dry-run is enabled by default and returns a WHMCS module error after
-confirming the request shape, so no billable CVM is created until dry-run is
-explicitly disabled for the product and addon settings.
+as `valid`. Dry-run is enabled by default and blocks CreateAccount, suspend,
+unsuspend, and terminate API calls, so no billable or state-changing Tencent
+Cloud action is made until dry-run is explicitly disabled for the product and
+addon settings.
 
-Suspend, unsuspend, terminate, power buttons, password reset, and console links
-intentionally return readable "not implemented" messages in v0.5.
+TerminateAccount has an additional addon safety checkbox and remains blocked
+unless `Allow destructive TerminateAccount API calls` is explicitly enabled.
+
+Customer power buttons, password reset, and console links intentionally return
+readable "not implemented" messages in v0.51.
 
 ## Secrets
 
