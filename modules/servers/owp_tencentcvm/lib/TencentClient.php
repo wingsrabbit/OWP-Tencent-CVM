@@ -121,11 +121,77 @@ final class TencentClient
     }
 
     /**
+     * @param list<array<string, mixed>> $filters
+     */
+    public function describeSubnetsByFilters(string $region, array $filters): TencentResponse
+    {
+        return $this->request('DescribeSubnets', ['Filters' => array_values($filters)], $region);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $filters
+     */
+    public function describeVpcs(string $region, array $filters = []): TencentResponse
+    {
+        $payload = [];
+        if ($filters !== []) {
+            $payload['Filters'] = array_values($filters);
+        }
+
+        return $this->request('DescribeVpcs', $payload, $region);
+    }
+
+    public function createVpc(string $region, string $vpcName, string $cidrBlock): TencentResponse
+    {
+        return $this->request('CreateVpc', [
+            'VpcName' => $vpcName,
+            'CidrBlock' => $cidrBlock,
+        ], $region);
+    }
+
+    public function createSubnet(string $region, string $vpcId, string $subnetName, string $cidrBlock, string $zone): TencentResponse
+    {
+        return $this->request('CreateSubnet', [
+            'VpcId' => $vpcId,
+            'SubnetName' => $subnetName,
+            'CidrBlock' => $cidrBlock,
+            'Zone' => $zone,
+        ], $region);
+    }
+
+    /**
      * @param list<string> $securityGroupIds
      */
     public function describeSecurityGroups(string $region, array $securityGroupIds): TencentResponse
     {
         return $this->request('DescribeSecurityGroups', ['SecurityGroupIds' => array_values($securityGroupIds)], $region);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $filters
+     */
+    public function describeSecurityGroupsByFilters(string $region, array $filters): TencentResponse
+    {
+        return $this->request('DescribeSecurityGroups', ['Filters' => array_values($filters)], $region);
+    }
+
+    public function createSecurityGroup(string $region, string $groupName, string $groupDescription): TencentResponse
+    {
+        return $this->request('CreateSecurityGroup', [
+            'GroupName' => $groupName,
+            'GroupDescription' => $groupDescription,
+        ], $region);
+    }
+
+    /**
+     * @param array<string, mixed> $policySet
+     */
+    public function createSecurityGroupPolicies(string $region, string $securityGroupId, array $policySet): TencentResponse
+    {
+        return $this->request('CreateSecurityGroupPolicies', [
+            'SecurityGroupId' => $securityGroupId,
+            'SecurityGroupPolicySet' => $policySet,
+        ], $region);
     }
 
     /**
@@ -202,6 +268,43 @@ final class TencentClient
     }
 
     /**
+     * @param array<string, mixed> $params
+     */
+    public function allocateAddresses(string $region, array $params): TencentResponse
+    {
+        return $this->request('AllocateAddresses', $params, $region);
+    }
+
+    public function associateAddress(string $region, string $addressId, string $instanceId): TencentResponse
+    {
+        return $this->request('AssociateAddress', [
+            'AddressId' => $addressId,
+            'InstanceId' => $instanceId,
+        ], $region);
+    }
+
+    /**
+     * @param list<string> $addressIds
+     */
+    public function describeAddresses(string $region, array $addressIds): TencentResponse
+    {
+        return $this->request('DescribeAddresses', ['AddressIds' => array_values($addressIds)], $region);
+    }
+
+    public function disassociateAddress(string $region, string $addressId): TencentResponse
+    {
+        return $this->request('DisassociateAddress', ['AddressId' => $addressId], $region);
+    }
+
+    /**
+     * @param list<string> $addressIds
+     */
+    public function releaseAddresses(string $region, array $addressIds): TencentResponse
+    {
+        return $this->request('ReleaseAddresses', ['AddressIds' => array_values($addressIds)], $region);
+    }
+
+    /**
      * @return array<string, string>
      */
     public function buildHeaders(string $action, string $region, string $payloadJson, int $timestamp): array
@@ -271,7 +374,7 @@ final class TencentClient
      */
     private function encodePayload(array $payload): string
     {
-        $payloadJson = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $payloadJson = json_encode($payload ?: new \stdClass(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         if (!is_string($payloadJson)) {
             throw new TencentApiException('Failed to encode Tencent Cloud API payload.');

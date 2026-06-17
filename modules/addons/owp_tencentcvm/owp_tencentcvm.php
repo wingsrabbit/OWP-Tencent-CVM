@@ -29,13 +29,18 @@ function owp_tencentcvm_activate(): array
     try {
         $result = Schema::install();
         $created = $result['created'] ?? [];
-        $description = empty($created)
+        $upgraded = $result['upgraded'] ?? [];
+        $descriptionParts = [];
+        $descriptionParts[] = empty($created)
             ? 'OWP Tencent CVM tables already exist.'
             : 'Created tables: ' . implode(', ', $created) . '.';
+        if (!empty($upgraded)) {
+            $descriptionParts[] = 'Upgraded columns: ' . implode(', ', $upgraded) . '.';
+        }
 
         return [
             'status' => 'success',
-            'description' => $description,
+            'description' => implode(' ', $descriptionParts),
         ];
     } catch (Throwable $exception) {
         return [

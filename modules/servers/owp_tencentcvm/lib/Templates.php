@@ -9,6 +9,12 @@ use WHMCS\Database\Capsule;
 
 final class Templates
 {
+    public const PUBLIC_IP_DIRECT = 'direct';
+    public const PUBLIC_IP_EIP = 'eip';
+    public const PUBLIC_IP_ANYCAST_EIP = 'anycast_eip';
+    public const DEFAULT_ANYCAST_ZONE = 'ANYCAST_ZONE_OVERSEAS';
+    public const DEFAULT_EIP_CHARGE_TYPE = 'TRAFFIC_POSTPAID_BY_HOUR';
+
     /**
      * @param array<string, mixed> $params
      */
@@ -104,6 +110,9 @@ final class Templates
             'security_group_id' => trim((string) ($data['security_group_id'] ?? '')),
             'bandwidth_mbps' => max(1, (int) ($data['bandwidth_mbps'] ?? 1)),
             'charge_type' => trim((string) ($data['charge_type'] ?? 'POSTPAID_BY_HOUR')),
+            'public_ip_mode' => self::publicIpMode((string) ($data['public_ip_mode'] ?? self::PUBLIC_IP_DIRECT)),
+            'anycast_zone' => self::anycastZone((string) ($data['anycast_zone'] ?? self::DEFAULT_ANYCAST_ZONE)),
+            'eip_internet_charge_type' => self::eipInternetChargeType((string) ($data['eip_internet_charge_type'] ?? self::DEFAULT_EIP_CHARGE_TYPE)),
             'system_disk_type' => trim((string) ($data['system_disk_type'] ?? 'CLOUD_BSSD')),
             'system_disk_size_gb' => max(20, (int) ($data['system_disk_size_gb'] ?? 50)),
             'validation_status' => 'not_checked',
@@ -160,11 +169,36 @@ final class Templates
      */
     private static function assertRequired(array $record): void
     {
-        foreach (['region', 'zone', 'instance_type', 'image_id', 'vpc_id', 'subnet_id', 'security_group_id'] as $field) {
+        foreach (['region', 'zone', 'instance_type', 'image_id'] as $field) {
             if (($record[$field] ?? '') === '') {
                 throw new InvalidArgumentException($field . ' is required.');
             }
         }
+    }
+
+    public static function publicIpMode(string $value): string
+    {
+        $value = trim($value);
+
+        return in_array($value, [self::PUBLIC_IP_DIRECT, self::PUBLIC_IP_EIP, self::PUBLIC_IP_ANYCAST_EIP], true)
+            ? $value
+            : self::PUBLIC_IP_DIRECT;
+    }
+
+    public static function anycastZone(string $value): string
+    {
+        $value = trim($value);
+
+        return $value !== '' ? $value : self::DEFAULT_ANYCAST_ZONE;
+    }
+
+    public static function eipInternetChargeType(string $value): string
+    {
+        $value = trim($value);
+
+        return in_array($value, ['TRAFFIC_POSTPAID_BY_HOUR', 'BANDWIDTH_POSTPAID_BY_HOUR'], true)
+            ? $value
+            : self::DEFAULT_EIP_CHARGE_TYPE;
     }
 
     private static function assertId(int $id): void

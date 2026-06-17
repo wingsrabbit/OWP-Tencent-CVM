@@ -184,8 +184,8 @@ final class Operations
         return [
             'version' => Config::version(),
             'tables' => Schema::tables(),
-            'apiStatus' => 'Client available; guarded CreateAccount, lifecycle controls, password reset, and read-only status sync are wired',
-            'liveCalls' => 'Write calls are blocked by dry-run by default; termination also requires explicit addon approval',
+            'apiStatus' => 'Client available; guarded CreateAccount, auto network/EIP provisioning, lifecycle controls, password reset, and read-only status sync are wired',
+            'liveCalls' => 'Write calls are blocked by dry-run by default; dry-run creates no CVM, network resource, or EIP, and termination also requires explicit addon approval',
         ];
     }
 }
