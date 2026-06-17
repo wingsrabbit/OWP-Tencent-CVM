@@ -228,11 +228,6 @@ final class Provisioner
             'Placement' => [
                 'Zone' => (string) $template['zone'],
             ],
-            'InternetAccessible' => [
-                'InternetChargeType' => 'TRAFFIC_POSTPAID_BY_HOUR',
-                'InternetMaxBandwidthOut' => (int) $template['bandwidth_mbps'],
-                'PublicIpAssigned' => $publicIpMode === Templates::PUBLIC_IP_DIRECT,
-            ],
             'SystemDisk' => [
                 'DiskType' => (string) $template['system_disk_type'],
                 'DiskSize' => (int) $template['system_disk_size_gb'],
@@ -242,6 +237,16 @@ final class Provisioner
                 'MonitorService' => ['Enabled' => true],
             ],
         ];
+
+        $payload['InternetAccessible'] = $publicIpMode === Templates::PUBLIC_IP_DIRECT
+            ? [
+                'InternetChargeType' => 'TRAFFIC_POSTPAID_BY_HOUR',
+                'InternetMaxBandwidthOut' => (int) $template['bandwidth_mbps'],
+                'PublicIpAssigned' => true,
+            ]
+            : [
+                'PublicIpAssigned' => false,
+            ];
 
         if ($network['vpc_id'] !== '' && $network['subnet_id'] !== '') {
             $payload['VirtualPrivateCloud'] = [

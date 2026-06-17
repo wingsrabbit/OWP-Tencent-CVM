@@ -297,7 +297,7 @@ Acceptance:
 
 ### v0.8.1 · Security group policy self-heal and prefix setting
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -311,6 +311,23 @@ Acceptance:
 - A v0.8.0-created security group with missing policies is repaired automatically on the next provisioning attempt.
 - Reused security groups do not skip policy verification.
 - Changing the prefix does not delete or rename existing Tencent Cloud resources.
+
+### v0.8.2 · EIP and Anycast provisioning fixes
+
+Status: current PR.
+
+Deliverables:
+
+- Keep `RunInstances` bandwidth settings only for direct public IP mode.
+- Allocate ordinary EIPs with charge type and bandwidth cap.
+- Allocate Anycast EIPs without `InternetChargeType`, while keeping the bandwidth cap.
+- Parse Tencent Anycast EIP `AddressSet` string-array responses.
+
+Acceptance:
+
+- EIP and Anycast templates do not send CVM public-bandwidth parameters while direct public IP templates still do.
+- Anycast EIP allocation can read the returned EIP ID when `AddressSet` contains strings.
+- Anycast bandwidth cap is applied during allocation without requiring a later bandwidth mutation API.
 
 ---
 

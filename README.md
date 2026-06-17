@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.8.1-blue)
+![version](https://img.shields.io/badge/version-v0.8.2-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.8.1 security group policy hardening stage. It now contains
+This repository is in the v0.8.2 EIP and Anycast EIP provisioning hardening stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and

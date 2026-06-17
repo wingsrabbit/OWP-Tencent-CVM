@@ -1,6 +1,6 @@
 # Tencent Cloud API Client
 
-v0.8.1 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
+v0.8.2 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
 security group, EIP, Anycast EIP, read-only validation calls needed by the admin
 template workflow, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, and read-only instance status sync. It is
@@ -48,22 +48,23 @@ validated as `valid`; with dry-run enabled it sends only a dry-run validation
 request, and with dry-run disabled it sends the live provisioning request.
 
 When a template uses `public_ip_mode = eip` or `anycast_eip`, CreateAccount sets
-`PublicIpAssigned = false` in `RunInstances`, then allocates and associates the
-EIP after Tencent returns the instance ID. Direct public IP mode keeps
-`PublicIpAssigned = true`.
+`PublicIpAssigned = false` in `RunInstances` and does not send
+`InternetMaxBandwidthOut`, then allocates and associates the EIP after Tencent
+returns the instance ID. Direct public IP mode keeps `PublicIpAssigned = true`
+and carries the template bandwidth in the CVM payload.
 
 WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
 `StartInstances` only when dry-run is disabled. WHMCS TerminateAccount calls
 `TerminateInstances` only when dry-run is disabled and the addon
 `allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
 reset-password, and VNC controls are wired through the embedded client-area
-panel in v0.8.1 and remain blocked by dry-run where they can change instance
+panel in v0.8.2 and remain blocked by dry-run where they can change instance
 state. Customer reinstall remains blocked.
 
 WHMCS ChangePassword calls `ResetInstancesPassword` only when dry-run is
 disabled and a local Tencent CVM instance ID exists. It sends `ForceStop =
 false` by default, so running instances may need to be suspended before password
-reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.1.
+reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.2.
 
 Custom endpoints are restricted to `*.tencentcloudapi.com`. Invalid stored or
 submitted endpoint values fall back to `cvm.tencentcloudapi.com`.
@@ -112,6 +113,17 @@ Runtime auto-created resources use these defaults:
 Dry-run never calls VPC, security group, allocation, association, disassociation,
 or release APIs. It only attempts guarded `RunInstances` dry-run validation and
 records that no CVM, network resource, or EIP was created.
+
+## EIP And Anycast EIP Allocation
+
+Ordinary EIP allocation sends `AddressCount`, `InternetChargeType`, and
+`InternetMaxBandwidthOut`.
+
+Anycast EIP allocation sends `AddressCount`, `AddressType = AnycastEIP`,
+`AnycastZone`, and `InternetMaxBandwidthOut`. It intentionally does not send
+`InternetChargeType`; Tencent Cloud rejects Anycast allocation when that charge
+type parameter is present. Tencent Cloud may return Anycast EIP IDs as a string
+array in `AddressSet`, so the module accepts both string and object forms.
 
 ## Responses And Errors
 

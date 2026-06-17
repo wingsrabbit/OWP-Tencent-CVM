@@ -10,6 +10,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-06-17
+
+### Fixed
+
+- Removed `InternetMaxBandwidthOut` from `RunInstances` payloads when templates use EIP or Anycast EIP public IP modes.
+- Removed `InternetChargeType` from Anycast EIP `AllocateAddresses` payloads while keeping `InternetMaxBandwidthOut` as the bandwidth cap.
+- Fixed Anycast EIP address ID parsing for Tencent Cloud responses where `AddressSet` is a string array.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, release docs, Tencent API docs, CAM policy, and module version constants for v0.8.2.
+
 ## [0.8.1] - 2026-06-17
 
 ### Fixed

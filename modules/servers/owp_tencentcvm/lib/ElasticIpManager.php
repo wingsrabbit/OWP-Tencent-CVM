@@ -86,14 +86,16 @@ final class ElasticIpManager
     {
         $payload = [
             'AddressCount' => 1,
-            'InternetChargeType' => Templates::eipInternetChargeType((string) ($template['eip_internet_charge_type'] ?? Templates::DEFAULT_EIP_CHARGE_TYPE)),
             'InternetMaxBandwidthOut' => max(1, (int) ($template['bandwidth_mbps'] ?? 1)),
         ];
 
         if ($mode === Templates::PUBLIC_IP_ANYCAST_EIP) {
             $payload['AddressType'] = 'AnycastEIP';
             $payload['AnycastZone'] = Templates::anycastZone((string) ($template['anycast_zone'] ?? Templates::DEFAULT_ANYCAST_ZONE));
+            return $payload;
         }
+
+        $payload['InternetChargeType'] = Templates::eipInternetChargeType((string) ($template['eip_internet_charge_type'] ?? Templates::DEFAULT_EIP_CHARGE_TYPE));
 
         return $payload;
     }
@@ -120,8 +122,15 @@ final class ElasticIpManager
         }
 
         $addresses = $data['AddressSet'] ?? [];
-        if (is_array($addresses) && is_array($addresses[0] ?? null)) {
-            return trim((string) ($addresses[0]['AddressId'] ?? ''));
+        if (is_array($addresses) && count($addresses) > 0) {
+            $first = $addresses[0];
+            if (is_string($first) && trim($first) !== '') {
+                return trim($first);
+            }
+
+            if (is_array($first)) {
+                return trim((string) ($first['AddressId'] ?? ''));
+            }
         }
 
         return trim((string) ($data['AddressId'] ?? ''));
