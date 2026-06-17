@@ -62,13 +62,7 @@ function owp_tencentcvm_ClientArea(array $params): array
 
 function owp_tencentcvm_ClientAreaCustomButtonArray(): array
 {
-    return [
-        'Start Instance' => 'StartInstance',
-        'Stop Instance' => 'StopInstance',
-        'Reboot Instance' => 'RebootInstance',
-        'Reset Password' => 'ResetInstancePassword',
-        'Open Console' => 'OpenConsole',
-    ];
+    return [];
 }
 
 function owp_tencentcvm_AdminCustomButtonArray(): array
@@ -80,27 +74,27 @@ function owp_tencentcvm_AdminCustomButtonArray(): array
 
 function owp_tencentcvm_StartInstance(array $params): string
 {
-    return Operations::notImplemented('StartInstance');
+    return Operations::startInstance($params);
 }
 
 function owp_tencentcvm_StopInstance(array $params): string
 {
-    return Operations::notImplemented('StopInstance');
+    return Operations::stopInstance($params);
 }
 
 function owp_tencentcvm_RebootInstance(array $params): string
 {
-    return Operations::notImplemented('RebootInstance');
+    return Operations::rebootInstance($params);
 }
 
 function owp_tencentcvm_ResetInstancePassword(array $params): string
 {
-    return Operations::notImplemented('ResetInstancePassword');
+    return Operations::resetInstancePassword($params);
 }
 
 function owp_tencentcvm_OpenConsole(array $params): string
 {
-    return Operations::notImplemented('OpenConsole');
+    return Operations::openConsole($params);
 }
 
 function owp_tencentcvm_SyncInstanceStatus(array $params): string

@@ -1,6 +1,6 @@
 # Tencent Cloud API Client
 
-v0.52 includes a self-contained Tencent Cloud API 3.0 client for CVM, read-only
+v0.6 includes a self-contained Tencent Cloud API 3.0 client for CVM, read-only
 validation calls needed by the admin template workflow, guarded CreateAccount
 provisioning, guarded service lifecycle actions, guarded password reset, and
 read-only instance status sync. It is bundled inside the WHMCS module and does
@@ -46,12 +46,14 @@ WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
 `StartInstances` only when dry-run is disabled. WHMCS TerminateAccount calls
 `TerminateInstances` only when dry-run is disabled and the addon
 `allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
-reset-password, VNC, and package-change buttons remain unwired in v0.52.
+reset-password, and VNC controls are wired through the embedded client-area
+panel in v0.6 and remain blocked by dry-run where they can change instance
+state. Customer reinstall remains blocked.
 
 WHMCS ChangePassword calls `ResetInstancesPassword` only when dry-run is
 disabled and a local Tencent CVM instance ID exists. It sends `ForceStop =
 false` by default, so running instances may need to be suspended before password
-reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.52.
+reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.6.
 
 ## Supported VPC Validation Methods
 

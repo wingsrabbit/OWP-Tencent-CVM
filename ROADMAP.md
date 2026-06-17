@@ -264,7 +264,7 @@ Acceptance:
 
 ### v0.52 · ChangePassword and ChangePackage
 
-Status: current stacked PR.
+Status: stacked PR.
 
 Deliverables:
 
@@ -281,6 +281,8 @@ Acceptance:
 ## Phase 5 · Client Area
 
 ### v0.6 · Client-area implementation from accepted design
+
+Status: current stacked PR.
 
 Deliverables:
 

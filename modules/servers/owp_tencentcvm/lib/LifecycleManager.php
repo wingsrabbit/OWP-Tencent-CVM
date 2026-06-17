@@ -10,10 +10,14 @@ use Throwable;
 final class LifecycleManager
 {
     private ConfigStore $configStore;
+    private string $actorType;
+    private string $actor;
 
-    public function __construct()
+    public function __construct(string $actorType = 'system', string $actor = '')
     {
         $this->configStore = new ConfigStore();
+        $this->actorType = $actorType;
+        $this->actor = $actor;
     }
 
     /**
@@ -39,7 +43,7 @@ final class LifecycleManager
         }
 
         Instances::upsertForService($serviceId, ['state' => 'stopping']);
-        Operations::record($serviceId, $templateId, 'SuspendAccount', 'success', 'StopInstances accepted.', $response->requestId());
+        $this->record($serviceId, $templateId, 'SuspendAccount', 'success', 'StopInstances accepted.', $response->requestId());
 
         return 'success';
     }
@@ -67,7 +71,7 @@ final class LifecycleManager
         }
 
         Instances::upsertForService($serviceId, ['state' => 'starting']);
-        Operations::record($serviceId, $templateId, 'UnsuspendAccount', 'success', 'StartInstances accepted.', $response->requestId());
+        $this->record($serviceId, $templateId, 'UnsuspendAccount', 'success', 'StartInstances accepted.', $response->requestId());
 
         return 'success';
     }
@@ -82,7 +86,7 @@ final class LifecycleManager
         $instanceId = (string) ($instance['instance_id'] ?? '');
 
         if ($instanceId === '') {
-            Operations::record($serviceId, $templateId, 'TerminateAccount', 'skipped', 'No Tencent CVM instance was recorded for this service.');
+            $this->record($serviceId, $templateId, 'TerminateAccount', 'skipped', 'No Tencent CVM instance was recorded for this service.');
             return 'success';
         }
 
@@ -91,7 +95,7 @@ final class LifecycleManager
         }
 
         if (!$this->configStore->bool('allow_terminate', false)) {
-            Operations::record($serviceId, $templateId, 'TerminateAccount', 'blocked', 'TerminateAccount is blocked by addon safety settings.');
+            $this->record($serviceId, $templateId, 'TerminateAccount', 'blocked', 'TerminateAccount is blocked by addon safety settings.');
             return 'TerminateAccount is blocked. Enable the addon safety setting only when destructive Tencent CVM termination is intended.';
         }
 
@@ -105,7 +109,7 @@ final class LifecycleManager
         }
 
         Instances::upsertForService($serviceId, ['state' => 'terminating']);
-        Operations::record($serviceId, $templateId, 'TerminateAccount', 'success', 'TerminateInstances accepted.', $response->requestId());
+        $this->record($serviceId, $templateId, 'TerminateAccount', 'success', 'TerminateInstances accepted.', $response->requestId());
 
         return 'success';
     }
@@ -136,7 +140,7 @@ final class LifecycleManager
         }
 
         Instances::upsertForService($serviceId, ['state' => 'password_resetting']);
-        Operations::record($serviceId, $templateId, 'ChangePassword', 'success', 'ResetInstancesPassword accepted.', $response->requestId());
+        $this->record($serviceId, $templateId, 'ChangePassword', 'success', 'ResetInstancesPassword accepted.', $response->requestId());
 
         return 'success';
     }
@@ -156,9 +160,91 @@ final class LifecycleManager
             }
         }
 
-        Operations::record($serviceId, $templateId, 'ChangePackage', 'blocked', 'ChangePackage is not supported in v0.52.');
+        $this->record($serviceId, $templateId, 'ChangePackage', 'blocked', 'ChangePackage is not supported in v0.6.');
 
-        return 'ChangePackage is not supported in v0.52. Open a planned resize workflow before changing Tencent CVM instance types.';
+        return 'ChangePackage is not supported in v0.6. Open a planned resize workflow before changing Tencent CVM instance types.';
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function startInstance(array $params): string
+    {
+        return $this->startRecordedInstance($params, 'StartInstance');
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function stopInstance(array $params): string
+    {
+        return $this->stopRecordedInstance($params, 'StopInstance');
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function rebootInstance(array $params): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+
+        if ($this->dryRunEnabled($params)) {
+            return $this->recordBlockedByDryRun($serviceId, $templateId, 'RebootInstance');
+        }
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->rebootInstances($this->region($params, $instance), [$instanceId], false);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'RebootInstance', $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'RebootInstance', $exception->getMessage());
+        }
+
+        Instances::upsertForService($serviceId, ['state' => 'rebooting']);
+        $this->record($serviceId, $templateId, 'RebootInstance', 'success', 'RebootInstances accepted.', $response->requestId());
+
+        return 'success';
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function resetInstancePassword(array $params, string $password): string
+    {
+        $params['password'] = $password;
+
+        return $this->resetPassword($params, 'ResetInstancePassword');
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function openConsole(array $params): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->describeInstanceVncUrl($this->region($params, $instance), $instanceId);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'OpenConsole', $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, 'OpenConsole', $exception->getMessage());
+        }
+
+        $url = (string) ($response->data()['InstanceVncUrl'] ?? '');
+        if ($url === '') {
+            return $this->recordFailure($serviceId, $templateId, 'OpenConsole', 'Tencent Cloud did not return an InstanceVncUrl.', $response->requestId());
+        }
+
+        $this->record($serviceId, $templateId, 'OpenConsole', 'success', 'DescribeInstanceVncUrl returned a console URL.', $response->requestId());
+
+        return $url;
     }
 
     /**
@@ -190,6 +276,93 @@ final class LifecycleManager
     private function dryRunEnabled(array $params): bool
     {
         return $this->configStore->bool('dry_run', true) || !empty($params['configoption3']);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function startRecordedInstance(array $params, string $operation): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+
+        if ($this->dryRunEnabled($params)) {
+            return $this->recordBlockedByDryRun($serviceId, $templateId, $operation);
+        }
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->startInstances($this->region($params, $instance), [$instanceId]);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage());
+        }
+
+        Instances::upsertForService($serviceId, ['state' => 'starting']);
+        $this->record($serviceId, $templateId, $operation, 'success', 'StartInstances accepted.', $response->requestId());
+
+        return 'success';
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function stopRecordedInstance(array $params, string $operation): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+
+        if ($this->dryRunEnabled($params)) {
+            return $this->recordBlockedByDryRun($serviceId, $templateId, $operation);
+        }
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->stopInstances($this->region($params, $instance), [$instanceId], false);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage());
+        }
+
+        Instances::upsertForService($serviceId, ['state' => 'stopping']);
+        $this->record($serviceId, $templateId, $operation, 'success', 'StopInstances accepted.', $response->requestId());
+
+        return 'success';
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function resetPassword(array $params, string $operation): string
+    {
+        [$serviceId, $instance] = $this->recordedInstance($params, false);
+        $templateId = $this->templateId($instance);
+        $instanceId = $this->requireInstanceId($instance);
+        $password = (string) ($params['password'] ?? '');
+
+        $this->assertPasswordLooksValid($password);
+
+        if ($this->dryRunEnabled($params)) {
+            return $this->recordBlockedByDryRun($serviceId, $templateId, $operation);
+        }
+
+        $client = new TencentClient($this->configStore->apiSettings());
+        try {
+            $response = $client->resetInstancesPassword($this->region($params, $instance), [$instanceId], $password, false);
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, $templateId, $operation, $exception->getMessage());
+        }
+
+        Instances::upsertForService($serviceId, ['state' => 'password_resetting']);
+        $this->record($serviceId, $templateId, $operation, 'success', 'ResetInstancesPassword accepted.', $response->requestId());
+
+        return 'success';
     }
 
     /**
@@ -251,7 +424,7 @@ final class LifecycleManager
 
     private function recordBlockedByDryRun(int $serviceId, ?int $templateId, string $operation): string
     {
-        Operations::record($serviceId, $templateId, $operation, 'dry_run', 'Dry-run is enabled; no Tencent Cloud API call was made.');
+        $this->record($serviceId, $templateId, $operation, 'dry_run', 'Dry-run is enabled; no Tencent Cloud API call was made.');
 
         return 'Dry-run is enabled; no Tencent Cloud API call was made.';
     }
@@ -259,8 +432,13 @@ final class LifecycleManager
     private function recordFailure(int $serviceId, ?int $templateId, string $operation, string $message, string $requestId = ''): string
     {
         $safeMessage = Redactor::redactString($message);
-        Operations::record($serviceId, $templateId, $operation, 'failed', $safeMessage, $requestId);
+        $this->record($serviceId, $templateId, $operation, 'failed', $safeMessage, $requestId);
 
         return $safeMessage;
+    }
+
+    private function record(int $serviceId, ?int $templateId, string $operation, string $status, string $message, string $requestId = ''): void
+    {
+        Operations::record($serviceId, $templateId, $operation, $status, $message, $requestId, $this->actorType, $this->actor);
     }
 }
