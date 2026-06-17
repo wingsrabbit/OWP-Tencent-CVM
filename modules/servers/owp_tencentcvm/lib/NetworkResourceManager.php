@@ -10,7 +10,7 @@ final class NetworkResourceManager
 {
     private const VPC_CIDR = '10.0.0.0/16';
     private const SUBNET_CIDR = '10.0.0.0/24';
-    private const NAME_PREFIX = 'owp-whmcs-auto';
+    private const MAX_RESOURCE_NAME_LENGTH = 60;
 
     public function __construct(private readonly ConfigStore $configStore)
     {
@@ -135,6 +135,7 @@ final class NetworkResourceManager
         $key = $this->key('auto_sg', [$region]);
         $cached = trim($this->configStore->get($key));
         if ($cached !== '') {
+            $this->ensureAllowAllPolicies($client, $serviceId, $templateId, $region, $cached);
             return $cached;
         }
 
@@ -144,6 +145,7 @@ final class NetworkResourceManager
         ]);
         $securityGroupId = $this->firstId($response->data()['SecurityGroupSet'] ?? [], ['SecurityGroupId']);
         if ($securityGroupId !== '') {
+            $this->ensureAllowAllPolicies($client, $serviceId, $templateId, $region, $securityGroupId);
             $this->configStore->set($key, $securityGroupId);
             Operations::record($serviceId, $templateId, 'DescribeSecurityGroups', 'success', 'Reused auto security group ' . $securityGroupId . '.', $response->requestId());
             return $securityGroupId;
@@ -155,16 +157,48 @@ final class NetworkResourceManager
             throw new RuntimeException('CreateSecurityGroup returned no SecurityGroupId.');
         }
 
-        $this->configStore->set($key, $securityGroupId);
         Operations::record($serviceId, $templateId, 'CreateSecurityGroup', 'success', 'Created auto security group ' . $securityGroupId . '.', $response->requestId());
 
-        $policyResponse = $client->createSecurityGroupPolicies($region, $securityGroupId, [
-            'Ingress' => [$this->allowAllPolicy()],
-            'Egress' => [$this->allowAllPolicy()],
-        ]);
-        Operations::record($serviceId, $templateId, 'CreateSecurityGroupPolicies', 'success', 'Applied allow-all ingress and egress policies to auto security group.', $policyResponse->requestId());
+        $this->ensureAllowAllPolicies($client, $serviceId, $templateId, $region, $securityGroupId);
+        $this->configStore->set($key, $securityGroupId);
 
         return $securityGroupId;
+    }
+
+    private function ensureAllowAllPolicies(TencentClient $client, int $serviceId, int $templateId, string $region, string $securityGroupId): void
+    {
+        $response = $client->describeSecurityGroupPolicies($region, $securityGroupId);
+        Operations::record($serviceId, $templateId, 'DescribeSecurityGroupPolicies', 'success', 'Checked allow-all policies on security group ' . $securityGroupId . '.', $response->requestId());
+
+        $policySet = $response->data()['SecurityGroupPolicySet'] ?? [];
+        $ingressPolicies = is_array($policySet) && is_array($policySet['Ingress'] ?? null) ? $policySet['Ingress'] : [];
+        $egressPolicies = is_array($policySet) && is_array($policySet['Egress'] ?? null) ? $policySet['Egress'] : [];
+
+        if (!$this->hasAllowAllPolicy($ingressPolicies)) {
+            $this->createMissingPolicy($client, $serviceId, $templateId, $region, $securityGroupId, 'Ingress');
+        }
+
+        if (!$this->hasAllowAllPolicy($egressPolicies)) {
+            $this->createMissingPolicy($client, $serviceId, $templateId, $region, $securityGroupId, 'Egress');
+        }
+    }
+
+    private function createMissingPolicy(TencentClient $client, int $serviceId, int $templateId, string $region, string $securityGroupId, string $direction): void
+    {
+        try {
+            $response = $client->createSecurityGroupPolicies($region, $securityGroupId, [
+                $direction => [$this->allowAllPolicy()],
+            ]);
+        } catch (TencentApiException $exception) {
+            if ($this->isDuplicatePolicyError($exception)) {
+                Operations::record($serviceId, $templateId, 'CreateSecurityGroupPolicies', 'success', $direction . ' allow-all policy already exists on security group ' . $securityGroupId . '.', $exception->requestId());
+                return;
+            }
+
+            throw $exception;
+        }
+
+        Operations::record($serviceId, $templateId, 'CreateSecurityGroupPolicies', 'success', 'Applied ' . $direction . ' allow-all policy to security group ' . $securityGroupId . '.', $response->requestId());
     }
 
     /**
@@ -178,6 +212,43 @@ final class NetworkResourceManager
             'CidrBlock' => '0.0.0.0/0',
             'Action' => 'ACCEPT',
         ];
+    }
+
+    /**
+     * @param mixed $policies
+     */
+    private function hasAllowAllPolicy($policies): bool
+    {
+        if (!is_array($policies)) {
+            return false;
+        }
+
+        foreach ($policies as $policy) {
+            if (!is_array($policy)) {
+                continue;
+            }
+
+            if (
+                strtoupper((string) ($policy['Protocol'] ?? '')) === 'ALL'
+                && strtoupper((string) ($policy['Port'] ?? '')) === 'ALL'
+                && (string) ($policy['CidrBlock'] ?? '') === '0.0.0.0/0'
+                && strtoupper((string) ($policy['Action'] ?? '')) === 'ACCEPT'
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isDuplicatePolicyError(TencentApiException $exception): bool
+    {
+        $text = strtolower($exception->errorCode() . ' ' . $exception->getMessage());
+        if (str_contains($text, 'not exist') || str_contains($text, 'notfound')) {
+            return false;
+        }
+
+        return str_contains($text, 'duplicate') || str_contains($text, 'already exist') || str_contains($text, 'already');
     }
 
     private function vpcClient(): TencentClient
@@ -202,7 +273,9 @@ final class NetworkResourceManager
      */
     private function name(string $type, array $parts): string
     {
-        return self::NAME_PREFIX . '-' . $type . '-' . implode('-', array_map([$this, 'slug'], $parts));
+        $name = $this->configStore->autoResourcePrefix() . '-' . $type . '-' . implode('-', array_map([$this, 'slug'], $parts));
+
+        return substr($name, 0, self::MAX_RESOURCE_NAME_LENGTH);
     }
 
     private function slug(string $value): string

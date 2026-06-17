@@ -214,8 +214,8 @@ final class ClientAreaController
         $instance = $serviceId > 0 ? Instances::findByServiceId($serviceId) : null;
         $templateId = isset($instance['template_id']) && (int) $instance['template_id'] > 0 ? (int) $instance['template_id'] : null;
 
-        Operations::record($serviceId, $templateId, 'ReinstallInstance', 'blocked', 'Reinstall is not supported in v0.8.0.', '', 'client', $this->clientActor($params));
+        Operations::record($serviceId, $templateId, 'ReinstallInstance', 'blocked', 'Reinstall is not supported in v0.8.1.', '', 'client', $this->clientActor($params));
 
-        return ['type' => 'warning', 'text' => 'Reinstall is not supported in v0.8.0; no Tencent Cloud API call was made.', 'consoleUrl' => ''];
+        return ['type' => 'warning', 'text' => 'Reinstall is not supported in v0.8.1; no Tencent Cloud API call was made.', 'consoleUrl' => ''];
     }
 }

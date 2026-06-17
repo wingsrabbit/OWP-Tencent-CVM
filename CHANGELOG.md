@@ -10,6 +10,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-06-17
+
+### Fixed
+
+- Split auto security group allow-all policy creation into separate ingress and egress `CreateSecurityGroupPolicies` calls.
+- Added idempotent security group policy self-healing for cached or name-matched auto security groups before reuse.
+- Delayed `auto_sg_{region}` cache writes until after required allow-all policies are confirmed.
+
+### Added
+
+- Added configurable `auto_resource_prefix` for auto-created VPC, subnet, and security group names.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, release docs, Tencent API docs, CAM policy, and module version constants for v0.8.1.
+
+### Notes
+
+- `auto_resource_prefix` affects newly created resources only. To rebuild auto resources with a new prefix, clear the relevant `auto_vpc_*`, `auto_subnet_*`, and `auto_sg_*` config keys manually; the plugin does not delete existing Tencent Cloud resources.
+
 ## [0.8.0] - 2026-06-17
 
 ### Added

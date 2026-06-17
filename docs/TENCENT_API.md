@@ -1,6 +1,6 @@
 # Tencent Cloud API Client
 
-v0.8.0 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
+v0.8.1 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
 security group, EIP, Anycast EIP, read-only validation calls needed by the admin
 template workflow, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, and read-only instance status sync. It is
@@ -57,13 +57,13 @@ WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
 `TerminateInstances` only when dry-run is disabled and the addon
 `allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
 reset-password, and VNC controls are wired through the embedded client-area
-panel in v0.8.0 and remain blocked by dry-run where they can change instance
+panel in v0.8.1 and remain blocked by dry-run where they can change instance
 state. Customer reinstall remains blocked.
 
 WHMCS ChangePassword calls `ResetInstancesPassword` only when dry-run is
 disabled and a local Tencent CVM instance ID exists. It sends `ForceStop =
 false` by default, so running instances may need to be suspended before password
-reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.0.
+reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.1.
 
 Custom endpoints are restricted to `*.tencentcloudapi.com`. Invalid stored or
 submitted endpoint values fall back to `cvm.tencentcloudapi.com`.
@@ -80,6 +80,7 @@ VPC-scoped client with endpoint
 - `describeVpcs`
 - `describeSubnets`
 - `describeSecurityGroups`
+- `describeSecurityGroupPolicies`
 - `createVpc`
 - `createSubnet`
 - `createSecurityGroup`
@@ -92,7 +93,7 @@ VPC-scoped client with endpoint
 
 Template validation remains read-only. If VPC, subnet, or security group IDs
 are blank, validation skips those reference checks and records that runtime
-provisioning will auto-create or reuse shared `owp-whmcs-auto-*` resources.
+provisioning will auto-create or reuse shared resources.
 
 Runtime auto-created resources use these defaults:
 
@@ -100,6 +101,11 @@ Runtime auto-created resources use these defaults:
 - Subnet CIDR: `10.0.0.0/24`
 - Security group ingress and egress: allow all, `Protocol = ALL`, `Port = ALL`,
   `CidrBlock = 0.0.0.0/0`, `Action = ACCEPT`
+- Security group policies are checked with `DescribeSecurityGroupPolicies` and
+  missing ingress or egress rules are created in separate
+  `CreateSecurityGroupPolicies` requests.
+- Auto-created resource name prefix: `auto_resource_prefix`, default
+  `owp-whmcs`. Changing the prefix affects newly created resources only.
 - Reuse keys in the addon config table: `auto_vpc_{region}`,
   `auto_subnet_{region}_{zone}`, and `auto_sg_{region}`
 

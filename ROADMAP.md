@@ -278,7 +278,7 @@ Acceptance:
 
 ### v0.8.0 · Automatic network and EIP modes
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -294,6 +294,23 @@ Acceptance:
 - Blank network IDs validate as runtime auto-resource intent instead of failing read-only checks.
 - Non-direct public IP modes run `RunInstances` with direct public IP assignment disabled.
 - TerminateAccount releases recorded EIPs before calling `TerminateInstances`.
+
+### v0.8.1 · Security group policy self-heal and prefix setting
+
+Status: current PR.
+
+Deliverables:
+
+- Split auto security group ingress and egress policy creation into separate Tencent Cloud API calls.
+- Check cached or name-matched auto security groups for required allow-all ingress and egress policies before reuse.
+- Cache newly created auto security groups only after required policies are confirmed.
+- Add admin-configurable auto resource name prefix for new VPC, subnet, and security group names.
+
+Acceptance:
+
+- A v0.8.0-created security group with missing policies is repaired automatically on the next provisioning attempt.
+- Reused security groups do not skip policy verification.
+- Changing the prefix does not delete or rename existing Tencent Cloud resources.
 
 ---
 

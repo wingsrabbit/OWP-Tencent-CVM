@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.8.0-blue)
+![version](https://img.shields.io/badge/version-v0.8.1-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.8.0 automatic network and EIP stage. It now contains
+This repository is in the v0.8.1 security group policy hardening stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
@@ -26,8 +26,9 @@ operator checklists, and a starter Tencent Cloud CAM policy. Reinstall remains
 blocked until a later explicit policy switch. Customer and admin POST actions
 include module-owned CSRF tokens. Resource templates can leave VPC, subnet, and
 security group IDs blank so the module can auto-create or reuse shared
-`owp-whmcs-auto-*` network resources at provisioning time. Templates can also
-choose direct public IP, Elastic IP, or Anycast Elastic IP modes.
+network resources at provisioning time. Auto-created resource names use the
+admin-configurable prefix `owp-whmcs` by default. Templates can also choose
+direct public IP, Elastic IP, or Anycast Elastic IP modes.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.

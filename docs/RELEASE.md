@@ -1,6 +1,6 @@
 # Release Package
 
-OWP Tencent CVM v0.8.0 is intended to be shipped as a public source package that
+OWP Tencent CVM v0.8.1 is intended to be shipped as a public source package that
 an operator uploads into WHMCS manually. The package must contain module code and
 public operator docs only. It must not contain local secrets, WHMCS deployment
 values, customer data, screenshots with private data, or live validation notes.
@@ -76,7 +76,7 @@ unzip -l "dist/owp-tencent-cvm-v${VERSION}.zip"
 2. Upload `modules/servers/owp_tencentcvm/` into the WHMCS root at the same path.
 3. Upload `modules/addons/owp_tencentcvm/` into the WHMCS root at the same path.
 4. In WHMCS admin, activate `OWP Tencent CVM` under Addon Modules.
-5. Open the addon page and confirm version `0.8.0`.
+5. Open the addon page and confirm version `0.8.1`.
 6. Enter Tencent Cloud credentials in the addon page.
 7. Keep addon dry-run enabled.
 8. Create a resource template and run template validation.
@@ -90,14 +90,18 @@ Use this checklist for the first manual install. Record results only in a
 private operator note unless all identifiers are redacted.
 
 - Addon activates without a WHMCS fatal error.
-- Addon page shows version `0.8.0`.
+- Addon page shows version `0.8.1`.
 - Addon-created tables exist or `install/schema.sql` matches the expected table
   shape.
 - Saved Tencent Cloud SecretId is displayed only in masked form.
 - Template validation can check zone, image, instance type, fixed subnet, fixed
   security group, public IP mode, and bandwidth policy.
 - Templates can leave VPC, subnet, and security group blank for runtime
-  auto-create/reuse of shared `owp-whmcs-auto-*` resources.
+  auto-create/reuse of shared resources using the configured auto resource name
+  prefix.
+- Changing the auto resource prefix affects newly created resources only; cached
+  `auto_vpc_*`, `auto_subnet_*`, and `auto_sg_*` config keys must be cleared
+  manually if the operator wants resources rebuilt with the new prefix.
 - A WHMCS product can select an enabled and validated template by name.
 - With dry-run enabled, CreateAccount does not create a billable Tencent Cloud
   CVM, network resource, or EIP.
@@ -105,7 +109,7 @@ private operator note unless all identifiers are redacted.
   operations without exposing Tencent Cloud credentials or raw internal errors.
 - Stop, reboot, password reset, and reinstall paths require explicit
   confirmation before handler execution.
-- Reinstall remains blocked and makes no Tencent Cloud API call in v0.8.0.
+- Reinstall remains blocked and makes no Tencent Cloud API call in v0.8.1.
 
 ## Live-Call Boundary
 

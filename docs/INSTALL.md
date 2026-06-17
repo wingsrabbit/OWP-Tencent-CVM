@@ -1,6 +1,6 @@
 # Install Guide
 
-OWP Tencent CVM v0.8.0 is a WHMCS module with a bundled Tencent Cloud API client,
+OWP Tencent CVM v0.8.1 is a WHMCS module with a bundled Tencent Cloud API client,
 encrypted credential storage, admin-side resource templates, read-only template
 validation, automatic VPC/subnet/security-group reuse, direct EIP and Anycast
 EIP modes, guarded CreateAccount provisioning, guarded service lifecycle
@@ -34,7 +34,7 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.8.0` in the module metadata.
+4. Confirm the admin page shows version `0.8.1` in the module metadata.
 5. Save credentials and create at least one resource template.
 6. Use `Validate` on each template to check zone, image, instance type, fixed subnet, fixed security group, public IP mode, and bandwidth policy before enabling sales. Blank VPC, subnet, or security group fields are skipped during validation and auto-created or reused during provisioning.
 
@@ -57,9 +57,13 @@ product and addon settings.
 
 For resource templates, VPC ID, Subnet ID, and Security Group ID can be left
 blank. In live provisioning, the module auto-creates or reuses shared
-`owp-whmcs-auto-*` VPC, subnet, and security group resources and stores their
-IDs in the addon config table. In dry-run, those network and EIP resources are
-not created.
+VPC, subnet, and security group resources and stores their IDs in the addon
+config table. Auto-created names use `Auto Resource Name Prefix` from the addon
+settings, defaulting to `owp-whmcs`. Changing the prefix affects newly created
+resources only; clear the relevant `auto_vpc_*`, `auto_subnet_*`, and
+`auto_sg_*` config keys manually if the operator intentionally wants the module
+to rebuild auto resources with the new prefix. In dry-run, those network and EIP
+resources are not created.
 
 TerminateAccount has an additional addon safety checkbox and remains blocked
 unless `Allow destructive TerminateAccount API calls` is explicitly enabled.
