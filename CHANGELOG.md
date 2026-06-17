@@ -10,6 +10,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.41] - 2026-06-16
+
+### Added
+
+- Added `TemplateValidator` for admin-triggered read-only resource template checks.
+- Added template validation actions to the WHMCS admin addon table.
+- Added CVM read-only methods for zones, images, and zone instance configuration.
+- Added VPC read-only methods for subnets and security groups.
+- Added persistent validation status and messages for sellable templates.
+
+### Changed
+
+- Reset template validation status when a template is edited.
+- Updated `README.md`, `VERSION`, install docs, and Tencent API docs for the v0.41 template validation stage.
+- Kept WHMCS provisioning and lifecycle entrypoints returning readable "not implemented" messages, so validation cannot automatically create, stop, reboot, or destroy CVMs.
+
 ## [0.4] - 2026-06-16
 
 ### Added

@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.4-blue)
+![version](https://img.shields.io/badge/version-v0.41-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,11 +11,11 @@
 
 ## Status
 
-This repository is in the v0.4 admin resource management stage. It now contains
+This repository is in the v0.41 template validation stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a minimal client-area placeholder, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
-admin-side sellable template CRUD.
+admin-side sellable template CRUD with read-only template validation.
 
 Provisioning and lifecycle actions still return readable "not implemented"
 messages. The API client exists in the library layer, but WHMCS lifecycle wiring
@@ -83,6 +83,7 @@ modules/
     lib/
       AdminPage.php
       ConfigStore.php
+      TemplateValidator.php
       TencentClient.php
       TencentApiException.php
       TencentResponse.php

@@ -1,6 +1,7 @@
 # Tencent Cloud API Client
 
-v0.3 adds a self-contained Tencent Cloud API 3.0 client for CVM. It is bundled
+v0.41 includes a self-contained Tencent Cloud API 3.0 client for CVM and the
+read-only validation calls needed by the admin template workflow. It is bundled
 inside the WHMCS module and does not require Composer.
 
 ## Signing
@@ -23,6 +24,9 @@ The library layer exposes these methods:
 
 - `describeInstances`
 - `describeInstancesStatus`
+- `describeZones`
+- `describeImages`
+- `describeZoneInstanceConfigInfos`
 - `runInstances`
 - `startInstances`
 - `stopInstances`
@@ -35,6 +39,17 @@ The library layer exposes these methods:
 `false`. WHMCS lifecycle entrypoints still return "not implemented", so
 installing the module does not automatically create, stop, reboot, or terminate
 cloud resources.
+
+## Supported VPC Validation Methods
+
+`TemplateValidator` uses a VPC-scoped client with endpoint
+`vpc.tencentcloudapi.com`, service `vpc`, and API version `2017-03-12` for:
+
+- `describeSubnets`
+- `describeSecurityGroups`
+
+Those calls are read-only and are used only from the admin addon template
+validation action.
 
 ## Responses And Errors
 

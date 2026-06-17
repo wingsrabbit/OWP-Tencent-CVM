@@ -43,6 +43,7 @@ final class AdminPage
                 'save_credentials' => [$this->saveCredentials()],
                 'test_connection' => [$this->testConnection()],
                 'save_template' => [$this->saveTemplate()],
+                'validate_template' => [$this->validateTemplate()],
                 'delete_template' => [$this->deleteTemplate()],
                 'toggle_template' => [$this->toggleTemplate()],
                 default => [['type' => 'warning', 'text' => 'Unknown admin action.']],
@@ -118,6 +119,20 @@ final class AdminPage
         Templates::delete((int) ($_POST['template_id'] ?? 0));
 
         return ['type' => 'success', 'text' => 'Template deleted.'];
+    }
+
+    /**
+     * @return array{type:string, text:string}
+     */
+    private function validateTemplate(): array
+    {
+        $result = (new TemplateValidator($this->configStore))->validate((int) ($_POST['template_id'] ?? 0));
+        $type = $result['status'] === 'valid' ? 'success' : ($result['status'] === 'warning' ? 'warning' : 'danger');
+
+        return [
+            'type' => $type,
+            'text' => 'Template validation ' . $result['status'] . ': ' . $result['message'],
+        ];
     }
 
     /**
@@ -229,10 +244,10 @@ final class AdminPage
         $html .= '<div class="panel-heading card-header"><strong>Sellable Resource Templates</strong></div>';
         $html .= '<div class="panel-body card-body">';
         $html .= '<table class="table table-striped table-bordered">';
-        $html .= '<thead><tr><th>ID</th><th>Name</th><th>Sales</th><th>Region / Zone</th><th>Instance</th><th>Image</th><th>Network</th><th>Disk</th><th>Actions</th></tr></thead><tbody>';
+        $html .= '<thead><tr><th>ID</th><th>Name</th><th>Sales</th><th>Region / Zone</th><th>Instance</th><th>Image</th><th>Network</th><th>Disk</th><th>Validation</th><th>Actions</th></tr></thead><tbody>';
 
         if ($templates === []) {
-            $html .= '<tr><td colspan="9" class="text-muted">No templates yet.</td></tr>';
+            $html .= '<tr><td colspan="10" class="text-muted">No templates yet.</td></tr>';
         }
 
         foreach ($templates as $template) {
@@ -246,6 +261,7 @@ final class AdminPage
             $html .= '<td>' . $this->escape((string) $template['image_id']) . '</td>';
             $html .= '<td>' . $this->escape((string) $template['vpc_id']) . '<br><small>' . $this->escape((string) $template['subnet_id']) . ' / ' . $this->escape((string) $template['security_group_id']) . '</small></td>';
             $html .= '<td>' . $this->escape((string) $template['system_disk_type']) . '<br><small>' . $this->escape((string) $template['system_disk_size_gb']) . ' GB</small></td>';
+            $html .= '<td>' . $this->validationBadge((string) ($template['validation_status'] ?? 'not_checked'), (string) ($template['validation_message'] ?? '')) . '</td>';
             $html .= '<td>' . $this->rowActions($moduleLink, (int) $template['id'], !$enabled) . '</td>';
             $html .= '</tr>';
         }
@@ -258,8 +274,13 @@ final class AdminPage
 
     private function rowActions(string $moduleLink, int $id, bool $enable): string
     {
+        $html = '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline">';
+        $html .= '<input type="hidden" name="owp_action" value="validate_template">';
+        $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
+        $html .= '<button type="submit" class="btn btn-xs btn-info">Validate</button>';
+        $html .= '</form> ';
         $confirm = $enable ? '' : ' onsubmit="return confirm(\'Disable this template for sales?\')"';
-        $html = '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline"' . $confirm . '>';
+        $html .= '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline"' . $confirm . '>';
         $html .= '<input type="hidden" name="owp_action" value="toggle_template">';
         $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
         $html .= '<input type="hidden" name="enabled" value="' . ($enable ? '1' : '0') . '">';
@@ -270,6 +291,23 @@ final class AdminPage
         $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
         $html .= '<button type="submit" class="btn btn-xs btn-danger">Delete</button>';
         $html .= '</form>';
+
+        return $html;
+    }
+
+    private function validationBadge(string $status, string $message): string
+    {
+        $class = match ($status) {
+            'valid' => 'label-success',
+            'warning' => 'label-warning',
+            'invalid' => 'label-danger',
+            default => 'label-default',
+        };
+
+        $html = '<span class="label ' . $class . '">' . $this->escape($status) . '</span>';
+        if ($message !== '') {
+            $html .= '<br><small>' . $this->escape($message) . '</small>';
+        }
 
         return $html;
     }

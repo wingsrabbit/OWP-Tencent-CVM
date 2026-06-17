@@ -216,6 +216,8 @@ Acceptance:
 
 ### v0.41 · Quota and template validation
 
+Status: current stacked PR.
+
 Deliverables:
 
 - Read-only checks for region/zone/template compatibility.
