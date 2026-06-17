@@ -10,6 +10,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6] - 2026-06-17
+
+### Added
+
+- Added `ClientAreaController` for embedded WHMCS product-page CVM controls.
+- Added customer start, stop, reboot, password reset, console, refresh, and blocked reinstall actions.
+- Added recent operation history to `clientarea.tpl`.
+- Added customer-facing instance overview with status, IPs, region, template, instance type, image, bandwidth, due date, WHMCS service ID, and Tencent instance ID.
+- Added scoped responsive CSS for the accepted client-area design.
+
+### Changed
+
+- Replaced the placeholder client-area template with the accepted CVM control panel layout.
+- Hid WHMCS default client-area custom buttons to avoid duplicate controls outside the embedded panel.
+- Kept customer reinstall blocked with an audit log until an explicit reinstall policy exists.
+- Updated `README.md`, `VERSION`, install docs, and Tencent API docs for the v0.6 client-area implementation stage.
+
 ## [0.52] - 2026-06-16
 
 ### Added

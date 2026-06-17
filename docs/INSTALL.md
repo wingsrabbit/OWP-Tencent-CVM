@@ -1,10 +1,11 @@
 # Install Guide
 
-OWP Tencent CVM v0.52 is a WHMCS module with a bundled Tencent Cloud API client,
+OWP Tencent CVM v0.6 is a WHMCS module with a bundled Tencent Cloud API client,
 encrypted credential storage, admin-side resource templates, read-only template
 validation, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, package-change rejection, and read-only status
-sync.
+sync. It also includes the customer-facing CVM control panel under the WHMCS
+product detail page.
 
 ## What To Upload
 
@@ -29,7 +30,7 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.52` in the module metadata.
+4. Confirm the admin page shows version `0.6` in the module metadata.
 5. Save credentials and create at least one resource template before later provisioning phases.
 6. Use `Validate` on each template to check zone, image, instance type, subnet, security group, and bandwidth policy before enabling sales.
 
@@ -52,10 +53,11 @@ addon settings.
 TerminateAccount has an additional addon safety checkbox and remains blocked
 unless `Allow destructive TerminateAccount API calls` is explicitly enabled.
 
-Customer power buttons, the customer reset-password button, and console links
-intentionally return readable "not implemented" messages in v0.52.
+Customer start, stop, reboot, password reset, console, and refresh controls are
+available in the embedded product-page panel. They remain blocked by dry-run
+until the addon and product safety settings are intentionally changed.
 
-ChangePassword is wired in v0.52 and calls Tencent `ResetInstancesPassword`
+ChangePassword is wired and calls Tencent `ResetInstancesPassword`
 without `ForceStop`. If Tencent reports that the instance must be stopped first,
 suspend the service before retrying or wait for a later explicit force-stop
 policy switch. ChangePackage is intentionally rejected with an audit log until a

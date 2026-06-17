@@ -29,16 +29,7 @@ final class Operations
      */
     public static function clientArea(array $params): array
     {
-        $serviceId = Instances::serviceId($params);
-        $instance = $serviceId > 0 ? Instances::findByServiceId($serviceId) : null;
-
-        return [
-            'templatefile' => 'clientarea',
-            'vars' => array_merge(
-                Config::clientAreaVariables($params),
-                ['instance' => $instance ?? Instances::placeholderFromParams($params)]
-            ),
-        ];
+        return (new ClientAreaController())->render($params);
     }
 
     public static function createAccount(array $params): string
@@ -95,6 +86,47 @@ final class Operations
         }
     }
 
+    public static function startInstance(array $params): string
+    {
+        try {
+            return (new LifecycleManager('client'))->startInstance($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function stopInstance(array $params): string
+    {
+        try {
+            return (new LifecycleManager('client'))->stopInstance($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function rebootInstance(array $params): string
+    {
+        try {
+            return (new LifecycleManager('client'))->rebootInstance($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
+    public static function resetInstancePassword(array $params): string
+    {
+        return 'ResetInstancePassword is available from the embedded client-area form so password confirmation can be collected safely.';
+    }
+
+    public static function openConsole(array $params): string
+    {
+        try {
+            return (new LifecycleManager('client'))->openConsole($params);
+        } catch (Throwable $exception) {
+            return Redactor::redactString($exception->getMessage());
+        }
+    }
+
     public static function syncInstanceStatus(array $params): string
     {
         try {
@@ -126,6 +158,22 @@ final class Operations
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function recentForService(int $serviceId, int $limit = 8): array
+    {
+        return array_map(
+            static fn ($row): array => (array) $row,
+            Capsule::table(Schema::OPERATIONS_TABLE)
+                ->where('service_id', $serviceId)
+                ->orderBy('id', 'desc')
+                ->limit(max(1, $limit))
+                ->get()
+                ->all()
+        );
     }
 
     /**

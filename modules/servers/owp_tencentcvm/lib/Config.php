@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.52';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.6';
     }
 
     /**
@@ -48,12 +48,13 @@ final class Config
         return [
             'moduleVersion' => self::version(),
             'serviceId' => isset($params['serviceid']) ? (string) $params['serviceid'] : '',
-            'productName' => isset($params['producttype']) ? (string) $params['producttype'] : 'server',
+            'productName' => isset($params['productname']) ? (string) $params['productname'] : (isset($params['producttype']) ? (string) $params['producttype'] : 'server'),
             'templateName' => isset($params['configoption1']) ? (string) $params['configoption1'] : '',
             'region' => isset($params['configoption2']) ? (string) $params['configoption2'] : '',
             'dryRun' => !empty($params['configoption3']),
-            'statusLabel' => 'Lifecycle guarded',
-            'notice' => 'WHMCS CreateAccount, lifecycle controls, guarded password reset, and read-only status sync are wired in v0.52. Customer power controls remain intentionally disabled.',
+            'dueDate' => isset($params['nextduedate']) ? (string) $params['nextduedate'] : '',
+            'statusLabel' => 'Client controls available',
+            'notice' => 'Client-area controls are guarded by admin safety settings and dry-run policy in v0.6.',
         ];
     }
 }
