@@ -282,7 +282,7 @@ Acceptance:
 
 ### v0.6 · Client-area implementation from accepted design
 
-Status: current stacked PR.
+Status: stacked PR.
 
 Deliverables:
 
@@ -311,6 +311,8 @@ Acceptance:
 ## Phase 6 · Packaging And Operator Docs
 
 ### v0.7 · Install guide and release package
+
+Status: current stacked PR.
 
 Deliverables:
 
