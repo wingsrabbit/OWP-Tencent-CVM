@@ -72,6 +72,7 @@ final class AdminPage
         $this->configStore->setSecret('secret_key', trim((string) ($_POST['secret_key'] ?? '')));
         $this->configStore->set('default_region', trim((string) ($_POST['default_region'] ?? 'ap-guangzhou')));
         $this->configStore->set('endpoint', ConfigStore::normalizeEndpoint((string) ($_POST['endpoint'] ?? 'cvm.tencentcloudapi.com')));
+        $this->configStore->set('auto_resource_prefix', ConfigStore::normalizeAutoResourcePrefix((string) ($_POST['auto_resource_prefix'] ?? '')));
         $this->configStore->setBool('dry_run', !empty($_POST['dry_run']));
         $this->configStore->setBool('allow_terminate', !empty($_POST['allow_terminate']));
         $this->configStore->set('timeout_seconds', (string) max(1, (int) ($_POST['timeout_seconds'] ?? 20)), 'int');
@@ -192,6 +193,7 @@ final class AdminPage
     {
         $defaultRegion = $this->configStore->get('default_region', 'ap-guangzhou');
         $endpoint = ConfigStore::normalizeEndpoint($this->configStore->get('endpoint', 'cvm.tencentcloudapi.com'));
+        $autoResourcePrefix = $this->configStore->autoResourcePrefix();
         $timeout = $this->configStore->get('timeout_seconds', '20');
         $dryRunChecked = $this->configStore->bool('dry_run', true) ? ' checked' : '';
         $allowTerminateChecked = $this->configStore->bool('allow_terminate', false) ? ' checked' : '';
@@ -207,6 +209,7 @@ final class AdminPage
         $html .= $this->input('SecretKey', 'secret_key', '', 'Leave blank to keep current value', 'password');
         $html .= $this->input('Default Region', 'default_region', $defaultRegion);
         $html .= $this->input('Endpoint', 'endpoint', $endpoint);
+        $html .= $this->input('Auto Resource Name Prefix', 'auto_resource_prefix', $autoResourcePrefix, 'Prefix for auto-created VPC, subnet, and security group names');
         $html .= $this->input('Timeout Seconds', 'timeout_seconds', $timeout, '', 'number');
         $html .= '<div class="checkbox"><label><input type="checkbox" name="dry_run" value="1"' . $dryRunChecked . '> Keep Dry-run enabled by default</label></div>';
         $html .= '<div class="checkbox"><label><input type="checkbox" name="allow_terminate" value="1"' . $allowTerminateChecked . '> Allow destructive TerminateAccount API calls</label></div>';
@@ -237,9 +240,9 @@ final class AdminPage
         $html .= $this->input('Zone', 'zone', 'ap-guangzhou-3');
         $html .= $this->input('Instance Type', 'instance_type', 'S5.MEDIUM4');
         $html .= $this->input('Image ID', 'image_id', 'img-placeholder');
-        $html .= $this->input('VPC ID', 'vpc_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto VPC');
-        $html .= $this->input('Subnet ID', 'subnet_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto subnet');
-        $html .= $this->input('Security Group ID', 'security_group_id', '', 'Leave blank to auto-create/reuse owp-whmcs-auto security group');
+        $html .= $this->input('VPC ID', 'vpc_id', '', 'Leave blank to auto-create/reuse a configured-prefix VPC');
+        $html .= $this->input('Subnet ID', 'subnet_id', '', 'Leave blank to auto-create/reuse a configured-prefix subnet');
+        $html .= $this->input('Security Group ID', 'security_group_id', '', 'Leave blank to auto-create/reuse a configured-prefix security group');
         $html .= $this->input('Bandwidth Mbps', 'bandwidth_mbps', '5', '', 'number');
         $html .= $this->input('Charge Type', 'charge_type', 'POSTPAID_BY_HOUR');
         $html .= $this->select('Public IP Mode', 'public_ip_mode', Templates::PUBLIC_IP_DIRECT, [

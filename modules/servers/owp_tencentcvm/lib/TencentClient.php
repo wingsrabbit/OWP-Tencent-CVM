@@ -183,6 +183,13 @@ final class TencentClient
         ], $region);
     }
 
+    public function describeSecurityGroupPolicies(string $region, string $securityGroupId): TencentResponse
+    {
+        return $this->request('DescribeSecurityGroupPolicies', [
+            'SecurityGroupId' => $securityGroupId,
+        ], $region);
+    }
+
     /**
      * @param array<string, mixed> $policySet
      */

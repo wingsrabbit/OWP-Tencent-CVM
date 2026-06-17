@@ -10,6 +10,8 @@ use WHMCS\Database\Capsule;
 final class ConfigStore
 {
     private const DEFAULT_ENDPOINT = 'cvm.tencentcloudapi.com';
+    private const DEFAULT_AUTO_RESOURCE_PREFIX = 'owp-whmcs';
+    private const MAX_AUTO_RESOURCE_PREFIX_LENGTH = 32;
 
     public function get(string $key, string $default = ''): string
     {
@@ -103,6 +105,24 @@ final class ConfigStore
             'endpoint' => self::normalizeEndpoint($this->get('endpoint', self::DEFAULT_ENDPOINT)),
             'timeout_seconds' => (int) $this->get('timeout_seconds', '20'),
         ];
+    }
+
+    public function autoResourcePrefix(): string
+    {
+        return self::normalizeAutoResourcePrefix($this->get('auto_resource_prefix', self::DEFAULT_AUTO_RESOURCE_PREFIX));
+    }
+
+    public static function normalizeAutoResourcePrefix(string $prefix): string
+    {
+        $prefix = trim($prefix);
+        $prefix = preg_replace('/[^A-Za-z0-9._-]+/', '-', $prefix) ?? '';
+        $prefix = trim($prefix, '-_.');
+
+        if ($prefix === '') {
+            return self::DEFAULT_AUTO_RESOURCE_PREFIX;
+        }
+
+        return substr($prefix, 0, self::MAX_AUTO_RESOURCE_PREFIX_LENGTH);
     }
 
     public static function normalizeEndpoint(string $endpoint, string $default = self::DEFAULT_ENDPOINT): string
