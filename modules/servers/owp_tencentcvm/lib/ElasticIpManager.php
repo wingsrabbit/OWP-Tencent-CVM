@@ -11,6 +11,9 @@ final class ElasticIpManager
     private const ADDRESS_READY_STATUS = 'UNBIND';
     private const ADDRESS_WAIT_ATTEMPTS = 15;
     private const ADDRESS_WAIT_SECONDS = 3;
+    private const INSTANCE_READY_STATUS = 'RUNNING';
+    private const INSTANCE_WAIT_ATTEMPTS = 15;
+    private const INSTANCE_WAIT_SECONDS = 4;
 
     public function __construct(private readonly ConfigStore $configStore)
     {
@@ -46,6 +49,7 @@ final class ElasticIpManager
         }
 
         $this->waitAddressAvailable($client, $region, $addressId, $serviceId, $templateId);
+        $this->waitInstanceRunning($this->cvmClient(), $region, $instanceId, $serviceId, $templateId);
 
         $response = $client->associateAddress($region, $addressId, $instanceId);
         Operations::record($serviceId, $templateId, 'AssociateAddress', 'success', 'Associated EIP ' . $addressId . ' to instance ' . $instanceId . '.', $response->requestId());
@@ -53,6 +57,34 @@ final class ElasticIpManager
         $publicIp = $this->publicIp($client, $region, $addressId, $serviceId, $templateId);
 
         return ['address_id' => $addressId, 'public_ip' => $publicIp];
+    }
+
+    public function addressBelongsToInstance(string $region, string $addressId, string $instanceId, int $serviceId, ?int $templateId): bool
+    {
+        $addressId = trim($addressId);
+        $instanceId = trim($instanceId);
+        if ($addressId === '' || $instanceId === '') {
+            return false;
+        }
+
+        $response = $this->vpcClient()->describeAddresses($region, [$addressId]);
+        $address = $this->firstAddress($response);
+        if ($address === []) {
+            Operations::record($serviceId, $templateId, 'DescribeAddresses', 'warning', 'Recorded EIP ' . $addressId . ' was not found.', $response->requestId());
+            return false;
+        }
+
+        $boundInstanceId = trim((string) ($address['InstanceId'] ?? $address['ResourceId'] ?? ''));
+        if ($boundInstanceId === $instanceId) {
+            Operations::record($serviceId, $templateId, 'DescribeAddresses', 'success', 'Recorded EIP ' . $addressId . ' is already associated to instance ' . $instanceId . '.', $response->requestId());
+            return true;
+        }
+
+        $status = $this->addressStatus($address);
+        $detail = $boundInstanceId !== '' ? 'bound to instance ' . $boundInstanceId : 'not bound to instance ' . $instanceId;
+        Operations::record($serviceId, $templateId, 'DescribeAddresses', 'warning', 'Recorded EIP ' . $addressId . ' is ' . $detail . '; status: ' . ($status !== '' ? $status : 'unknown') . '.', $response->requestId());
+
+        return false;
     }
 
     public function publicIpForAddress(string $region, string $addressId, int $serviceId, ?int $templateId): string
@@ -137,6 +169,37 @@ final class ElasticIpManager
         );
     }
 
+    private function waitInstanceRunning(TencentClient $client, string $region, string $instanceId, int $serviceId, int $templateId): void
+    {
+        $lastStatus = '';
+
+        for ($attempt = 1; $attempt <= self::INSTANCE_WAIT_ATTEMPTS; $attempt++) {
+            $response = $client->describeInstancesByIds($region, [$instanceId]);
+            $instance = $this->firstInstance($response);
+            $lastStatus = $this->instanceState($instance);
+
+            if ($lastStatus === self::INSTANCE_READY_STATUS) {
+                Operations::record(
+                    $serviceId,
+                    $templateId,
+                    'DescribeInstances',
+                    'success',
+                    'CVM instance ' . $instanceId . ' is RUNNING and ready for EIP association.',
+                    $response->requestId()
+                );
+                return;
+            }
+
+            if ($attempt < self::INSTANCE_WAIT_ATTEMPTS) {
+                sleep(self::INSTANCE_WAIT_SECONDS);
+            }
+        }
+
+        throw new RuntimeException(
+            'CVM instance ' . $instanceId . ' did not become RUNNING before AssociateAddress. Last state: ' . ($lastStatus !== '' ? $lastStatus : 'unknown') . '.'
+        );
+    }
+
     private function publicIp(TencentClient $client, string $region, string $addressId, int $serviceId, ?int $templateId): string
     {
         $response = $client->describeAddresses($region, [$addressId]);
@@ -164,11 +227,32 @@ final class ElasticIpManager
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    private function firstInstance(TencentResponse $response): array
+    {
+        $instances = $response->data()['InstanceSet'] ?? [];
+        if (!is_array($instances) || !is_array($instances[0] ?? null)) {
+            return [];
+        }
+
+        return $instances[0];
+    }
+
+    /**
      * @param array<string, mixed> $address
      */
     private function addressStatus(array $address): string
     {
         return strtoupper(trim((string) ($address['AddressStatus'] ?? $address['Status'] ?? '')));
+    }
+
+    /**
+     * @param array<string, mixed> $instance
+     */
+    private function instanceState(array $instance): string
+    {
+        return strtoupper(trim((string) ($instance['InstanceState'] ?? $instance['State'] ?? '')));
     }
 
     private function firstAddressId(TencentResponse $response): string
@@ -201,5 +285,10 @@ final class ElasticIpManager
             'service' => 'vpc',
             'version' => '2017-03-12',
         ]));
+    }
+
+    private function cvmClient(): TencentClient
+    {
+        return new TencentClient($this->configStore->apiSettings());
     }
 }

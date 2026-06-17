@@ -1,6 +1,6 @@
 # Release Package
 
-OWP Tencent CVM v0.8.4 is intended to be shipped as a public source package that
+OWP Tencent CVM v0.8.5 is intended to be shipped as a public source package that
 an operator uploads into WHMCS manually. The package must contain module code and
 public operator docs only. It must not contain local secrets, WHMCS deployment
 values, customer data, screenshots with private data, or live validation notes.
@@ -76,7 +76,7 @@ unzip -l "dist/owp-tencent-cvm-v${VERSION}.zip"
 2. Upload `modules/servers/owp_tencentcvm/` into the WHMCS root at the same path.
 3. Upload `modules/addons/owp_tencentcvm/` into the WHMCS root at the same path.
 4. In WHMCS admin, activate `OWP Tencent CVM` under Addon Modules.
-5. Open the addon page and confirm version `0.8.4`.
+5. Open the addon page and confirm version `0.8.5`.
 6. Enter Tencent Cloud credentials in the addon page.
 7. Keep addon dry-run enabled.
 8. Create a resource template and run template validation.
@@ -90,7 +90,7 @@ Use this checklist for the first manual install. Record results only in a
 private operator note unless all identifiers are redacted.
 
 - Addon activates without a WHMCS fatal error.
-- Addon page shows version `0.8.4`.
+- Addon page shows version `0.8.5`.
 - Addon-created tables exist or `install/schema.sql` matches the expected table
   shape.
 - Saved Tencent Cloud SecretId is displayed only in masked form.
@@ -109,7 +109,7 @@ private operator note unless all identifiers are redacted.
   operations without exposing Tencent Cloud credentials or raw internal errors.
 - Stop, reboot, password reset, and reinstall paths require explicit
   confirmation before handler execution.
-- Reinstall remains blocked and makes no Tencent Cloud API call in v0.8.4.
+- Reinstall remains blocked and makes no Tencent Cloud API call in v0.8.5.
 
 ## Live-Call Boundary
 

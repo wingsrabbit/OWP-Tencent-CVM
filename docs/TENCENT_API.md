@@ -1,6 +1,6 @@
 # Tencent Cloud API Client
 
-v0.8.4 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
+v0.8.5 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
 security group, EIP, Anycast EIP, read-only validation calls needed by the admin
 template workflow, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, and read-only instance status sync. It is
@@ -59,21 +59,29 @@ ghost recovery path is bounded to avoid creating an infinite retry loop.
 When a template uses `public_ip_mode = eip` or `anycast_eip`, CreateAccount sets
 `PublicIpAssigned = false` in `RunInstances` and does not send
 `InternetMaxBandwidthOut`, then allocates and associates the EIP after Tencent
-returns the instance ID. Direct public IP mode keeps `PublicIpAssigned = true`
-and carries the template bandwidth in the CVM payload.
+returns the instance ID. Before association, the module verifies the EIP is
+`UNBIND` and the target CVM is `RUNNING`. Direct public IP mode keeps
+`PublicIpAssigned = true` and carries the template bandwidth in the CVM payload.
+
+When CreateAccount is retried for an existing recorded instance, the module no
+longer treats a non-empty `eip_address_id` as complete by itself. It calls
+`DescribeAddresses` for the recorded EIP and skips only when that EIP is already
+associated to the current instance. If the recorded EIP is allocated but still
+unbound, the module reuses that address ID and runs the normal readiness checks
+before `AssociateAddress`.
 
 WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
 `StartInstances` only when dry-run is disabled. WHMCS TerminateAccount calls
 `TerminateInstances` only when dry-run is disabled and the addon
 `allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
 reset-password, and VNC controls are wired through the embedded client-area
-panel in v0.8.4 and remain blocked by dry-run where they can change instance
+panel in v0.8.5 and remain blocked by dry-run where they can change instance
 state. Customer reinstall remains blocked.
 
 WHMCS ChangePassword calls `ResetInstancesPassword` only when dry-run is
 disabled and a local Tencent CVM instance ID exists. It sends `ForceStop =
 false` by default, so running instances may need to be suspended before password
-reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.4.
+reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.5.
 
 Custom endpoints are restricted to `*.tencentcloudapi.com`. Invalid stored or
 submitted endpoint values fall back to `cvm.tencentcloudapi.com`.
@@ -141,6 +149,10 @@ as `CREATING` for several seconds, so this wait prevents the association call
 from racing the asynchronous address creation step. If the address does not
 become attachable inside the bounded wait window, provisioning fails with a
 clear timeout message instead of retrying an invalid association call.
+
+The association step also polls `DescribeInstances` until the target CVM reports
+`InstanceState = RUNNING`. Tencent Cloud can reject `AssociateAddress` while a
+newly created CVM is still `PENDING`, even when the EIP itself is ready.
 
 ## Responses And Errors
 

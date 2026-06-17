@@ -35,7 +35,15 @@ final class Provisioner
         $existing = Instances::findByServiceId($serviceId);
 
         if ($existing !== null && (string) ($existing['instance_id'] ?? '') !== '') {
-            if ($this->needsElasticIp($template, $existing, $dryRun)) {
+            try {
+                $needsElasticIp = $this->needsElasticIp($serviceId, $template, $existing, $dryRun);
+            } catch (TencentApiException $exception) {
+                return $this->recordFailure($serviceId, (int) $template['id'], 'DescribeAddresses', $exception->getMessage(), $exception->requestId());
+            } catch (Throwable $exception) {
+                return $this->recordFailure($serviceId, (int) $template['id'], 'DescribeAddresses', $exception->getMessage());
+            }
+
+            if ($needsElasticIp) {
                 $this->assertTemplateCanProvision($template);
                 return $this->ensureElasticIpForExistingInstance($serviceId, $template, $existing);
             }
@@ -156,7 +164,7 @@ final class Provisioner
      * @param array<string, mixed> $template
      * @param array<string, mixed> $existing
      */
-    private function needsElasticIp(array $template, array $existing, bool $dryRun): bool
+    private function needsElasticIp(int $serviceId, array $template, array $existing, bool $dryRun): bool
     {
         if ($dryRun) {
             return false;
@@ -164,7 +172,26 @@ final class Provisioner
 
         $mode = Templates::publicIpMode((string) ($template['public_ip_mode'] ?? Templates::PUBLIC_IP_DIRECT));
 
-        return $mode !== Templates::PUBLIC_IP_DIRECT && trim((string) ($existing['eip_address_id'] ?? '')) === '';
+        if ($mode === Templates::PUBLIC_IP_DIRECT) {
+            return false;
+        }
+
+        $addressId = trim((string) ($existing['eip_address_id'] ?? ''));
+        if ($addressId === '') {
+            return true;
+        }
+
+        $instanceId = trim((string) ($existing['instance_id'] ?? ''));
+        if ($instanceId === '') {
+            return true;
+        }
+
+        $region = trim((string) ($existing['region'] ?? ''));
+        if ($region === '') {
+            $region = (string) $template['region'];
+        }
+
+        return !(new ElasticIpManager($this->configStore))->addressBelongsToInstance($region, $addressId, $instanceId, $serviceId, (int) $template['id']);
     }
 
     /**
@@ -175,9 +202,10 @@ final class Provisioner
     {
         $templateId = (int) $template['id'];
         $instanceId = (string) ($existing['instance_id'] ?? '');
+        $existingAddressId = trim((string) ($existing['eip_address_id'] ?? ''));
 
         try {
-            $eip = (new ElasticIpManager($this->configStore))->ensureAssociated($serviceId, $templateId, $template, $instanceId);
+            $eip = (new ElasticIpManager($this->configStore))->ensureAssociated($serviceId, $templateId, $template, $instanceId, $existingAddressId);
             Instances::upsertForService($serviceId, [
                 'template_id' => $templateId,
                 'eip_address_id' => $eip['address_id'],

@@ -10,6 +10,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-06-17
+
+### Fixed
+
+- Wait for the target CVM to reach `RUNNING` before calling `AssociateAddress`.
+- Reuse a recorded allocated-but-unbound EIP when retrying CreateAccount for an existing instance.
+- Detect whether a recorded EIP is actually associated to the current instance before skipping existing-instance provisioning.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, release docs, Tencent API docs, CAM policy, and module version constants for v0.8.5.
+
 ## [0.8.4] - 2026-06-17
 
 ### Fixed

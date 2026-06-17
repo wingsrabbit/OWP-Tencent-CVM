@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.8.4-blue)
+![version](https://img.shields.io/badge/version-v0.8.5-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.8.4 ClientToken idempotency hardening stage. It now contains
+This repository is in the v0.8.5 CVM/EIP association readiness hardening stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
@@ -33,6 +33,8 @@ wait for Tencent Cloud to report the allocated address as `UNBIND` before
 calling `AssociateAddress`. CreateAccount also verifies that the `RunInstances`
 instance ID exists before persisting it, and only switches to a differentiated
 ClientToken when Tencent Cloud idempotency returns a terminated ghost instance.
+EIP association waits for the target CVM to become `RUNNING`, and retries can
+reuse a recorded allocated-but-unbound EIP instead of skipping the service.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
