@@ -106,6 +106,7 @@
                     <span>Last sync follows the latest operation record</span>
                     <form method="post">
                         <input type="hidden" name="owp_client_action" value="sync">
+                        <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                         <button type="submit" class="owp-cvm-btn">Refresh</button>
                     </form>
                 </div>
@@ -132,10 +133,12 @@
                 <div class="owp-cvm-action-row">
                     <form method="post">
                         <input type="hidden" name="owp_client_action" value="start">
+                        <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                         <button type="submit" class="owp-cvm-btn owp-cvm-btn-primary" {if $instance.can_start neq '1'}disabled="disabled"{/if}>Start</button>
                     </form>
                     <form method="post">
                         <input type="hidden" name="owp_client_action" value="console">
+                        <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                         <button type="submit" class="owp-cvm-btn" {if $instance.can_console neq '1'}disabled="disabled"{/if}>VNC Console</button>
                     </form>
                 </div>
@@ -144,11 +147,13 @@
                 <div class="owp-cvm-action-row">
                     <form method="post" onsubmit="return confirm('Stop this CVM instance? Services on the instance may become unavailable.');">
                         <input type="hidden" name="owp_client_action" value="stop">
+                        <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                         <input type="hidden" name="confirm_value" value="STOP">
                         <button type="submit" class="owp-cvm-btn owp-cvm-btn-danger" {if $instance.can_stop neq '1'}disabled="disabled"{/if}>Stop</button>
                     </form>
                     <form method="post" onsubmit="return confirm('Reboot this CVM instance? Unsaved data may be lost.');">
                         <input type="hidden" name="owp_client_action" value="reboot">
+                        <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                         <input type="hidden" name="confirm_value" value="REBOOT">
                         <button type="submit" class="owp-cvm-btn owp-cvm-btn-warning" {if $instance.can_reboot neq '1'}disabled="disabled"{/if}>Reboot</button>
                     </form>
@@ -159,6 +164,7 @@
                     <div class="owp-cvm-details-body">
                         <form method="post">
                             <input type="hidden" name="owp_client_action" value="reset_password">
+                            <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                             <div class="owp-cvm-form-grid">
                                 <div class="owp-cvm-field">
                                     <label>New Password</label>
@@ -180,9 +186,10 @@
         <details class="owp-cvm-details owp-cvm-details-danger">
             <summary><span>Dangerous Operations</span><span>expand</span></summary>
             <div class="owp-cvm-details-body">
-                <p class="owp-cvm-help">Reinstall is intentionally isolated and blocked in v0.6. Future support will require an admin policy switch and typed confirmation.</p>
+                <p class="owp-cvm-help">Reinstall is intentionally isolated and blocked in v0.7.1. Future support will require an admin policy switch and typed confirmation.</p>
                 <form method="post">
                     <input type="hidden" name="owp_client_action" value="reinstall">
+                    <input type="hidden" name="owp_tencentcvm_csrf_token" value="{$csrfToken|escape}">
                     <div class="owp-cvm-field">
                         <label>Type REINSTALL to confirm</label>
                         <input type="text" name="confirm_value" placeholder="REINSTALL">

@@ -1,6 +1,6 @@
 # Tencent Cloud CAM Policy
 
-This is a starter CAM policy for OWP Tencent CVM v0.7. Review it in Tencent
+This is a starter CAM policy for OWP Tencent CVM v0.7.1. Review it in Tencent
 Cloud CAM before production use. Tencent Cloud recommends using the policy
 generator for custom policies, and the CAM policy language is JSON-based with
 `version`, `statement`, `action`, `resource`, and `effect` fields.
@@ -66,7 +66,7 @@ operator has a rollback plan.
 }
 ```
 
-## Not Required In v0.7
+## Not Required In v0.7.1
 
 Do not grant these actions for the current module:
 

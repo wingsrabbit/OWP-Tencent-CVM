@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.7-blue)
+![version](https://img.shields.io/badge/version-v0.7.1-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.7 release-package documentation stage. It now contains
+This repository is in the v0.7.1 CSRF hardening stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
@@ -23,7 +23,8 @@ suspend/unsuspend/terminate, guarded password reset, package-change rejection
 policy, read-only status sync, and a customer-facing control panel modeled from
 the accepted design. Release-package docs now cover manual WHMCS upload,
 operator checklists, and a starter Tencent Cloud CAM policy. Reinstall remains
-blocked until a later explicit policy switch.
+blocked until a later explicit policy switch. Customer and admin POST actions
+include module-owned CSRF tokens.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
@@ -89,6 +90,7 @@ modules/
     lib/
       AdminPage.php
       ConfigStore.php
+      CsrfGuard.php
       ClientAreaController.php
       LifecycleManager.php
       Provisioner.php

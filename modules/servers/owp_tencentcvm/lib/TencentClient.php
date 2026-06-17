@@ -27,7 +27,7 @@ final class TencentClient
     {
         $this->secretId = trim((string) ($settings['secret_id'] ?? ''));
         $this->secretKey = trim((string) ($settings['secret_key'] ?? ''));
-        $this->endpoint = trim((string) ($settings['endpoint'] ?? '')) ?: self::DEFAULT_ENDPOINT;
+        $this->endpoint = ConfigStore::normalizeEndpoint((string) ($settings['endpoint'] ?? ''), self::DEFAULT_ENDPOINT);
         $this->service = trim((string) ($settings['service'] ?? '')) ?: self::DEFAULT_SERVICE;
         $this->version = trim((string) ($settings['version'] ?? '')) ?: self::DEFAULT_VERSION;
         $this->language = trim((string) ($settings['language'] ?? '')) ?: 'en-US';
