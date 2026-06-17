@@ -347,7 +347,7 @@ Acceptance:
 
 ### v0.8.4 · ClientToken ghost instance recovery
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -361,6 +361,22 @@ Acceptance:
 - A missing `InstanceSet` after `RunInstances` does not flow into `AssociateAddress`.
 - A terminated ghost instance returned by the base ClientToken triggers at most two differentiated-token rebuild attempts.
 - Failure messages include the last ghost `InstanceId` instead of the later EIP association error.
+
+### v0.8.5 · CVM-ready EIP association retry
+
+Status: current PR.
+
+Deliverables:
+
+- Wait for the target CVM to reach `RUNNING` before `AssociateAddress`.
+- Check whether a recorded EIP is actually associated to the recorded instance before skipping existing-instance CreateAccount.
+- Reuse a recorded allocated-but-unbound EIP on retry instead of allocating a new address.
+
+Acceptance:
+
+- `AssociateAddress` is not called while the target CVM is still `PENDING`.
+- Existing service records with `instance_id` plus unbound `eip_address_id` enter EIP association instead of returning skipped success.
+- Retry for service 19 can reuse the recorded CVM and EIP resources without requiring cleanup.
 
 ---
 
