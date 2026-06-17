@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.12-blue)
+![version](https://img.shields.io/badge/version-v0.13-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -64,6 +64,8 @@ The module should call Tencent Cloud API 3.0 directly with a small self-containe
 docs/
   design/
     client-area-prompt.md
+    admin-addon-prompt.md
+    admin-addon-revision-prompt.md
 modules/
   servers/owp_tencentcvm/
     owp_tencentcvm.php
@@ -86,8 +88,15 @@ docs/
 ## Design Workflow
 
 Customer and admin pages are designed with external design-tool prompts before
-implementation. The first prompt is available at
-[docs/design/client-area-prompt.md](docs/design/client-area-prompt.md).
+implementation:
+
+- [docs/design/client-area-prompt.md](docs/design/client-area-prompt.md)
+- [docs/design/admin-addon-prompt.md](docs/design/admin-addon-prompt.md)
+- [docs/design/admin-addon-revision-prompt.md](docs/design/admin-addon-revision-prompt.md)
+
+Use the full prompt for the first Claude Design artifact. For later iterations
+inside the same Claude Design conversation, use the revision prompt so Claude can
+modify the current artifact instead of rebuilding the page from scratch.
 
 ---
 
