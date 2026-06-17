@@ -71,7 +71,7 @@ client, avoiding Composer as a hard install-time dependency.
 
 ### v0.11 · Roadmap and PR plan
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -87,6 +87,8 @@ Acceptance:
 
 ### v0.12 · Client-area design prompt
 
+Status: merged.
+
 Deliverable: a prompt for the external design tool, not code.
 
 The prompt must cover:
@@ -99,7 +101,9 @@ The prompt must cover:
 - Operation log visible to the customer.
 - WHMCS embedding constraints: product detail page, no full standalone app shell.
 - Confirmation copy for destructive actions.
-- Mobile and desktop layout.
+- Claude Design H5 output is accepted as a desktop main-panel prototype first;
+  responsive/mobile treatment remains part of the client-area implementation
+  acceptance.
 
 Acceptance:
 
@@ -107,6 +111,8 @@ Acceptance:
 - The design output can be mapped to `clientarea.tpl` without guessing.
 
 ### v0.13 · Admin-addon design prompt
+
+Status: current PR.
 
 Deliverable: a prompt for the external design tool, not code.
 

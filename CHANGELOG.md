@@ -26,6 +26,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Updated `README.md` and `VERSION` for the v0.2 module skeleton stage.
 - Kept all Tencent Cloud actions as readable "not implemented" responses so no live API calls can occur in this version.
 
+## [0.13] - 2026-06-16
+
+### Added
+
+- Added the Claude Design prompt for the WHMCS admin addon page at `docs/design/admin-addon-prompt.md`.
+- Added a shorter Claude Design revision prompt at `docs/design/admin-addon-revision-prompt.md` for iterative artifact fixes.
+- Linked both design prompts from `README.md`.
+
+### Changed
+
+- Tightened the admin addon prompt after reviewing Claude Design outputs, requiring visible template copy action, billing/disk fields, confirmation before disabling templates, and no clipped row actions at 1280px width.
+
 ## [0.12] - 2026-06-16
 
 ### Added
