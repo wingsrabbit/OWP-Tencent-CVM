@@ -32,9 +32,9 @@ The library layer exposes these methods:
 - `terminateInstances`
 
 `runInstances()` defaults to `DryRun = true` unless the caller explicitly passes
-`false`. WHMCS lifecycle entrypoints still return "not implemented" in this
-version, so installing v0.3 does not automatically create, stop, reboot, or
-terminate cloud resources.
+`false`. WHMCS lifecycle entrypoints still return "not implemented", so
+installing the module does not automatically create, stop, reboot, or terminate
+cloud resources.
 
 ## Responses And Errors
 

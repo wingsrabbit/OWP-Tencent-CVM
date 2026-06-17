@@ -42,7 +42,7 @@ function owp_tencentcvm_UnsuspendAccount(array $params): string
 
 function owp_tencentcvm_TerminateAccount(array $params): string
 {
-    return Operations::notImplemented('TerminateAccount', 'Destructive termination is intentionally not wired in v0.3.');
+    return Operations::notImplemented('TerminateAccount', 'Destructive termination is intentionally not wired in v0.4.');
 }
 
 function owp_tencentcvm_ChangePassword(array $params): string
