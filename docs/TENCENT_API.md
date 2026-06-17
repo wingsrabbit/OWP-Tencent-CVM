@@ -1,6 +1,6 @@
 # Tencent Cloud API Client
 
-v0.8.3 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
+v0.8.4 includes a self-contained Tencent Cloud API 3.0 client for CVM, VPC,
 security group, EIP, Anycast EIP, read-only validation calls needed by the admin
 template workflow, guarded CreateAccount provisioning, guarded service lifecycle
 actions, guarded password reset, and read-only instance status sync. It is
@@ -47,6 +47,15 @@ The library layer exposes these methods:
 validated as `valid`; with dry-run enabled it sends only a dry-run validation
 request, and with dry-run disabled it sends the live provisioning request.
 
+After live `RunInstances` returns an instance ID, CreateAccount uses a short
+bounded `DescribeInstances` check for that exact ID before it persists the
+instance or starts EIP association. The normal `ClientToken` remains stable for
+duplicate WHMCS CreateAccount calls. If Tencent Cloud idempotency returns an
+instance ID that `DescribeInstances` cannot find, the module treats it as a
+terminated ghost instance and retries `RunInstances` with a deterministic
+differentiated token derived from the base token and ghost instance ID. This
+ghost recovery path is bounded to avoid creating an infinite retry loop.
+
 When a template uses `public_ip_mode = eip` or `anycast_eip`, CreateAccount sets
 `PublicIpAssigned = false` in `RunInstances` and does not send
 `InternetMaxBandwidthOut`, then allocates and associates the EIP after Tencent
@@ -58,13 +67,13 @@ WHMCS SuspendAccount and UnsuspendAccount call `StopInstances` and
 `TerminateInstances` only when dry-run is disabled and the addon
 `allow_terminate` setting is explicitly enabled. Customer start, stop, reboot,
 reset-password, and VNC controls are wired through the embedded client-area
-panel in v0.8.3 and remain blocked by dry-run where they can change instance
+panel in v0.8.4 and remain blocked by dry-run where they can change instance
 state. Customer reinstall remains blocked.
 
 WHMCS ChangePassword calls `ResetInstancesPassword` only when dry-run is
 disabled and a local Tencent CVM instance ID exists. It sends `ForceStop =
 false` by default, so running instances may need to be suspended before password
-reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.3.
+reset. WHMCS ChangePackage is intentionally rejected with an audit log in v0.8.4.
 
 Custom endpoints are restricted to `*.tencentcloudapi.com`. Invalid stored or
 submitted endpoint values fall back to `cvm.tencentcloudapi.com`.

@@ -331,7 +331,7 @@ Acceptance:
 
 ### v0.8.3 · EIP association readiness wait
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -344,6 +344,23 @@ Acceptance:
 - Anycast EIP provisioning does not call `AssociateAddress` while the address is still `CREATING`.
 - Ordinary EIP provisioning uses the same bounded readiness wait without changing allocation payloads.
 - Timeout errors identify the EIP ID and last observed address status.
+
+### v0.8.4 · ClientToken ghost instance recovery
+
+Status: current PR.
+
+Deliverables:
+
+- Verify the `RunInstances` instance ID with a short bounded `DescribeInstances` check before persisting it or binding EIP.
+- Keep the normal ClientToken stable for ordinary WHMCS duplicate CreateAccount calls.
+- When Tencent Cloud idempotency returns a missing terminated instance, retry with a deterministic differentiated ClientToken derived from the ghost instance ID.
+- Cap ghost recovery retries and record validation/rebuild operation logs.
+
+Acceptance:
+
+- A missing `InstanceSet` after `RunInstances` does not flow into `AssociateAddress`.
+- A terminated ghost instance returned by the base ClientToken triggers at most two differentiated-token rebuild attempts.
+- Failure messages include the last ghost `InstanceId` instead of the later EIP association error.
 
 ---
 

@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.8.3';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.8.4';
     }
 
     /**
@@ -54,7 +54,7 @@ final class Config
             'dryRun' => !empty($params['configoption3']),
             'dueDate' => isset($params['nextduedate']) ? (string) $params['nextduedate'] : '',
             'statusLabel' => 'Client controls available',
-            'notice' => 'Client-area controls are guarded by admin safety settings, CSRF protection, and dry-run policy in v0.8.3.',
+            'notice' => 'Client-area controls are guarded by admin safety settings, CSRF protection, and dry-run policy in v0.8.4.',
         ];
     }
 }

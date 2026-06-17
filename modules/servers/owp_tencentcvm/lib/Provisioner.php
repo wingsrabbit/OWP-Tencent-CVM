@@ -9,6 +9,10 @@ use Throwable;
 
 final class Provisioner
 {
+    private const CLIENT_TOKEN_GHOST_REBUILD_ATTEMPTS = 2;
+    private const INSTANCE_VERIFY_ATTEMPTS = 3;
+    private const INSTANCE_VERIFY_SECONDS = 2;
+
     private ConfigStore $configStore;
 
     public function __construct()
@@ -73,6 +77,24 @@ final class Provisioner
         $instanceId = $this->firstInstanceId($response);
         if ($instanceId === '') {
             return $this->recordFailure($serviceId, (int) $template['id'], 'CreateAccount', 'RunInstances returned no InstanceIdSet.', $response->requestId());
+        }
+
+        try {
+            $verifiedRun = $this->verifiedRunInstancesInstance(
+                $client,
+                (string) $template['region'],
+                $serviceId,
+                (int) $template['id'],
+                $payload,
+                $response,
+                $instanceId
+            );
+            $instanceId = $verifiedRun['instance_id'];
+            $response = $verifiedRun['response'];
+        } catch (TencentApiException $exception) {
+            return $this->recordFailure($serviceId, (int) $template['id'], 'CreateAccount', $exception->getMessage(), $exception->requestId());
+        } catch (Throwable $exception) {
+            return $this->recordFailure($serviceId, (int) $template['id'], 'CreateAccount', $exception->getMessage());
         }
 
         Instances::upsertForService($serviceId, [
@@ -265,6 +287,90 @@ final class Provisioner
     private function clientToken(int $serviceId, int $templateId): string
     {
         return 'owp-whmcs-' . $serviceId . '-' . substr(hash('sha256', (string) $templateId), 0, 12);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array{instance_id:string, response:TencentResponse}
+     */
+    private function verifiedRunInstancesInstance(
+        TencentClient $client,
+        string $region,
+        int $serviceId,
+        int $templateId,
+        array $payload,
+        TencentResponse $response,
+        string $instanceId
+    ): array {
+        $baseClientToken = trim((string) ($payload['ClientToken'] ?? ''));
+        if ($baseClientToken === '') {
+            $baseClientToken = $this->clientToken($serviceId, $templateId);
+        }
+
+        for ($attempt = 0; $attempt <= self::CLIENT_TOKEN_GHOST_REBUILD_ATTEMPTS; $attempt++) {
+            if ($this->runInstancesInstanceExists($client, $region, $serviceId, $templateId, $instanceId)) {
+                return ['instance_id' => $instanceId, 'response' => $response];
+            }
+
+            if ($attempt >= self::CLIENT_TOKEN_GHOST_REBUILD_ATTEMPTS) {
+                throw new RuntimeException('RunInstances kept returning instance IDs that DescribeInstances could not find. Last ghost InstanceId: ' . $instanceId . '.');
+            }
+
+            $ghostInstanceId = $instanceId;
+            $payload['ClientToken'] = $this->clientTokenForGhostInstance($baseClientToken, $ghostInstanceId, $attempt + 1);
+            $response = $client->runInstances($region, $payload, false);
+            Operations::record(
+                $serviceId,
+                $templateId,
+                'CreateAccount',
+                'warning',
+                'Re-ran RunInstances with a differentiated ClientToken after Tencent Cloud returned ghost instance ' . $ghostInstanceId . '.',
+                $response->requestId()
+            );
+
+            $instanceId = $this->firstInstanceId($response);
+            if ($instanceId === '') {
+                throw new RuntimeException('RunInstances retry after ghost instance ' . $ghostInstanceId . ' returned no InstanceIdSet.');
+            }
+        }
+
+        return ['instance_id' => $instanceId, 'response' => $response];
+    }
+
+    private function runInstancesInstanceExists(TencentClient $client, string $region, int $serviceId, int $templateId, string $instanceId): bool
+    {
+        $lastRequestId = '';
+
+        for ($attempt = 1; $attempt <= self::INSTANCE_VERIFY_ATTEMPTS; $attempt++) {
+            $response = $client->describeInstancesByIds($region, [$instanceId]);
+            $lastRequestId = $response->requestId();
+            $instances = $response->data()['InstanceSet'] ?? [];
+
+            if (is_array($instances) && count($instances) > 0 && is_array($instances[0])) {
+                Operations::record($serviceId, $templateId, 'DescribeInstances', 'success', 'Verified RunInstances instance ' . $instanceId . ' exists.', $response->requestId());
+                return true;
+            }
+
+            if ($attempt < self::INSTANCE_VERIFY_ATTEMPTS) {
+                sleep(self::INSTANCE_VERIFY_SECONDS);
+            }
+        }
+
+        Operations::record(
+            $serviceId,
+            $templateId,
+            'DescribeInstances',
+            'warning',
+            'RunInstances returned instance ' . $instanceId . ', but DescribeInstances did not find it; treating it as a ClientToken idempotency ghost.',
+            $lastRequestId
+        );
+
+        return false;
+    }
+
+    private function clientTokenForGhostInstance(string $baseClientToken, string $ghostInstanceId, int $attempt): string
+    {
+        return $baseClientToken . '-' . substr(hash('sha256', $ghostInstanceId . ':' . $attempt), 0, 8);
     }
 
     private function isDryRunSuccess(TencentApiException $exception): bool

@@ -10,6 +10,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-06-17
+
+### Fixed
+
+- Verify with a bounded `DescribeInstances` check that `RunInstances` returned an instance that still exists before persisting it or binding an EIP.
+- Re-run `RunInstances` with a differentiated deterministic `ClientToken` when Tencent Cloud idempotency returns a terminated ghost instance.
+- Added a bounded retry limit and clear failure message for repeated ClientToken ghost responses.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, release docs, Tencent API docs, CAM policy, and module version constants for v0.8.4.
+
 ## [0.8.3] - 2026-06-17
 
 ### Fixed
