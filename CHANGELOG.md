@@ -10,6 +10,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-06-17
+
+### Fixed
+
+- Wait for allocated ordinary EIPs and Anycast EIPs to reach `UNBIND` before calling `AssociateAddress`.
+- Return a clear timeout error if Tencent Cloud does not make the EIP attachable before the association window expires.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, release docs, Tencent API docs, CAM policy, and module version constants for v0.8.3.
+
 ## [0.8.2] - 2026-06-17
 
 ### Fixed

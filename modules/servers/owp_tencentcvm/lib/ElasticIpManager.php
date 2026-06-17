@@ -8,6 +8,10 @@ use RuntimeException;
 
 final class ElasticIpManager
 {
+    private const ADDRESS_READY_STATUS = 'UNBIND';
+    private const ADDRESS_WAIT_ATTEMPTS = 15;
+    private const ADDRESS_WAIT_SECONDS = 3;
+
     public function __construct(private readonly ConfigStore $configStore)
     {
     }
@@ -40,6 +44,8 @@ final class ElasticIpManager
                 'eip_address_id' => $addressId,
             ]);
         }
+
+        $this->waitAddressAvailable($client, $region, $addressId, $serviceId, $templateId);
 
         $response = $client->associateAddress($region, $addressId, $instanceId);
         Operations::record($serviceId, $templateId, 'AssociateAddress', 'success', 'Associated EIP ' . $addressId . ' to instance ' . $instanceId . '.', $response->requestId());
@@ -100,17 +106,69 @@ final class ElasticIpManager
         return $payload;
     }
 
+    private function waitAddressAvailable(TencentClient $client, string $region, string $addressId, int $serviceId, int $templateId): void
+    {
+        $lastStatus = '';
+
+        for ($attempt = 1; $attempt <= self::ADDRESS_WAIT_ATTEMPTS; $attempt++) {
+            $response = $client->describeAddresses($region, [$addressId]);
+            $address = $this->firstAddress($response);
+            $lastStatus = $this->addressStatus($address);
+
+            if ($lastStatus === self::ADDRESS_READY_STATUS) {
+                Operations::record(
+                    $serviceId,
+                    $templateId,
+                    'DescribeAddresses',
+                    'success',
+                    'EIP ' . $addressId . ' is UNBIND and ready for association.',
+                    $response->requestId()
+                );
+                return;
+            }
+
+            if ($attempt < self::ADDRESS_WAIT_ATTEMPTS) {
+                sleep(self::ADDRESS_WAIT_SECONDS);
+            }
+        }
+
+        throw new RuntimeException(
+            'EIP ' . $addressId . ' did not become UNBIND before AssociateAddress. Last status: ' . ($lastStatus !== '' ? $lastStatus : 'unknown') . '.'
+        );
+    }
+
     private function publicIp(TencentClient $client, string $region, string $addressId, int $serviceId, ?int $templateId): string
     {
         $response = $client->describeAddresses($region, [$addressId]);
         Operations::record($serviceId, $templateId, 'DescribeAddresses', 'success', 'Synchronized EIP address metadata.', $response->requestId());
 
-        $addresses = $response->data()['AddressSet'] ?? [];
-        if (!is_array($addresses) || !is_array($addresses[0] ?? null)) {
+        $address = $this->firstAddress($response);
+        if ($address === []) {
             return '';
         }
 
-        return trim((string) ($addresses[0]['AddressIp'] ?? $addresses[0]['PublicIpAddress'] ?? ''));
+        return trim((string) ($address['AddressIp'] ?? $address['PublicIpAddress'] ?? ''));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function firstAddress(TencentResponse $response): array
+    {
+        $addresses = $response->data()['AddressSet'] ?? [];
+        if (!is_array($addresses) || !is_array($addresses[0] ?? null)) {
+            return [];
+        }
+
+        return $addresses[0];
+    }
+
+    /**
+     * @param array<string, mixed> $address
+     */
+    private function addressStatus(array $address): string
+    {
+        return strtoupper(trim((string) ($address['AddressStatus'] ?? $address['Status'] ?? '')));
     }
 
     private function firstAddressId(TencentResponse $response): string
