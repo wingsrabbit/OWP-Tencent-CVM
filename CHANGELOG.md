@@ -10,6 +10,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.52] - 2026-06-16
+
+### Added
+
+- Added guarded WHMCS ChangePassword support through Tencent `ResetInstancesPassword`.
+- Added local password complexity checks before calling Tencent Cloud.
+- Added `ForceStop = false` to password reset calls by default.
+- Added audited ChangePackage rejection until a planned resize workflow exists.
+
+### Changed
+
+- Updated Tencent client password reset support to include `ForceStop` and optional username parameters.
+- Updated `README.md`, `VERSION`, install docs, and Tencent API docs for the v0.52 password and package policy stage.
+- Kept customer power buttons, customer reset-password button, and console actions returning readable "not implemented" messages.
+
 ## [0.51] - 2026-06-16
 
 ### Added

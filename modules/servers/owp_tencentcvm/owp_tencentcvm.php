@@ -47,12 +47,12 @@ function owp_tencentcvm_TerminateAccount(array $params): string
 
 function owp_tencentcvm_ChangePassword(array $params): string
 {
-    return Operations::notImplemented('ChangePassword', 'Password reset support is scheduled for a later lifecycle phase.');
+    return Operations::changePassword($params);
 }
 
 function owp_tencentcvm_ChangePackage(array $params): string
 {
-    return Operations::notImplemented('ChangePackage', 'Package changes require admin resource templates first.');
+    return Operations::changePackage($params);
 }
 
 function owp_tencentcvm_ClientArea(array $params): array

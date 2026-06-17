@@ -249,7 +249,7 @@ Acceptance:
 
 ### v0.51 · Suspend, unsuspend, terminate
 
-Status: current stacked PR.
+Status: stacked PR.
 
 Deliverables:
 
@@ -263,6 +263,8 @@ Acceptance:
 - Destructive action logs include WHMCS service ID and Tencent `RequestId`.
 
 ### v0.52 · ChangePassword and ChangePackage
+
+Status: current stacked PR.
 
 Deliverables:
 
