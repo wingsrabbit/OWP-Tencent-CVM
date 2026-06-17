@@ -10,6 +10,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-17
+
+### Added
+
+- Added module-owned CSRF tokens to every client-area CVM POST action.
+- Added module-owned CSRF tokens to every admin addon POST action.
+
+### Changed
+
+- Restricted configurable Tencent Cloud API endpoints to `*.tencentcloudapi.com`, falling back to `cvm.tencentcloudapi.com` for invalid values.
+- Updated `README.md`, `VERSION`, and module version constants for the v0.7.1 security hardening stage.
+
 ## [0.7] - 2026-06-17
 
 ### Added

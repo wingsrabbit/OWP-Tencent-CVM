@@ -37,6 +37,13 @@ final class AdminPage
         }
 
         $action = (string) ($_POST['owp_action'] ?? '');
+        if ($action === '') {
+            return [];
+        }
+
+        if (!CsrfGuard::validatePost()) {
+            return [['type' => 'warning', 'text' => 'Security token expired or invalid; no admin action was performed. Refresh the page and retry.']];
+        }
 
         try {
             return match ($action) {
@@ -64,7 +71,7 @@ final class AdminPage
         $this->configStore->setSecret('secret_id', trim((string) ($_POST['secret_id'] ?? '')));
         $this->configStore->setSecret('secret_key', trim((string) ($_POST['secret_key'] ?? '')));
         $this->configStore->set('default_region', trim((string) ($_POST['default_region'] ?? 'ap-guangzhou')));
-        $this->configStore->set('endpoint', trim((string) ($_POST['endpoint'] ?? 'cvm.tencentcloudapi.com')));
+        $this->configStore->set('endpoint', ConfigStore::normalizeEndpoint((string) ($_POST['endpoint'] ?? 'cvm.tencentcloudapi.com')));
         $this->configStore->setBool('dry_run', !empty($_POST['dry_run']));
         $this->configStore->setBool('allow_terminate', !empty($_POST['allow_terminate']));
         $this->configStore->set('timeout_seconds', (string) max(1, (int) ($_POST['timeout_seconds'] ?? 20)), 'int');
@@ -181,7 +188,7 @@ final class AdminPage
     private function renderCredentialPanel(string $moduleLink): string
     {
         $defaultRegion = $this->configStore->get('default_region', 'ap-guangzhou');
-        $endpoint = $this->configStore->get('endpoint', 'cvm.tencentcloudapi.com');
+        $endpoint = ConfigStore::normalizeEndpoint($this->configStore->get('endpoint', 'cvm.tencentcloudapi.com'));
         $timeout = $this->configStore->get('timeout_seconds', '20');
         $dryRunChecked = $this->configStore->bool('dry_run', true) ? ' checked' : '';
         $allowTerminateChecked = $this->configStore->bool('allow_terminate', false) ? ' checked' : '';
@@ -192,6 +199,7 @@ final class AdminPage
         $html .= '<p>SecretId: <code>' . $this->escape($this->configStore->maskedSecretId()) . '</code></p>';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '">';
         $html .= '<input type="hidden" name="owp_action" value="save_credentials">';
+        $html .= $this->csrfField();
         $html .= $this->input('SecretId', 'secret_id', '', 'Leave blank to keep current value');
         $html .= $this->input('SecretKey', 'secret_key', '', 'Leave blank to keep current value', 'password');
         $html .= $this->input('Default Region', 'default_region', $defaultRegion);
@@ -203,6 +211,7 @@ final class AdminPage
         $html .= '</form>';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '" style="margin-top:10px">';
         $html .= '<input type="hidden" name="owp_action" value="test_connection">';
+        $html .= $this->csrfField();
         $html .= '<button type="submit" class="btn btn-default">Test Read-only Connection</button>';
         $html .= '</form>';
         $html .= '</div></div>';
@@ -217,6 +226,7 @@ final class AdminPage
         $html .= '<div class="panel-body card-body">';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '">';
         $html .= '<input type="hidden" name="owp_action" value="save_template">';
+        $html .= $this->csrfField();
         $html .= $this->input('Template ID For Update', 'template_id', '', 'Leave blank to create');
         $html .= $this->input('Name', 'name', 'cn-gz-basic-2c4g');
         $html .= '<div class="checkbox"><label><input type="checkbox" name="enabled" value="1"> Enable for sales</label></div>';
@@ -279,18 +289,21 @@ final class AdminPage
     {
         $html = '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline">';
         $html .= '<input type="hidden" name="owp_action" value="validate_template">';
+        $html .= $this->csrfField();
         $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
         $html .= '<button type="submit" class="btn btn-xs btn-info">Validate</button>';
         $html .= '</form> ';
         $confirm = $enable ? '' : ' onsubmit="return confirm(\'Disable this template for sales?\')"';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline"' . $confirm . '>';
         $html .= '<input type="hidden" name="owp_action" value="toggle_template">';
+        $html .= $this->csrfField();
         $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
         $html .= '<input type="hidden" name="enabled" value="' . ($enable ? '1' : '0') . '">';
         $html .= '<button type="submit" class="btn btn-xs btn-default">' . ($enable ? 'Enable' : 'Disable') . '</button>';
         $html .= '</form> ';
         $html .= '<form method="post" action="' . $this->escape($moduleLink) . '" style="display:inline" onsubmit="return confirm(\'Delete this template?\')">';
         $html .= '<input type="hidden" name="owp_action" value="delete_template">';
+        $html .= $this->csrfField();
         $html .= '<input type="hidden" name="template_id" value="' . $id . '">';
         $html .= '<button type="submit" class="btn btn-xs btn-danger">Delete</button>';
         $html .= '</form>';
@@ -323,6 +336,11 @@ final class AdminPage
         $html .= '</div>';
 
         return $html;
+    }
+
+    private function csrfField(): string
+    {
+        return CsrfGuard::input();
     }
 
     private function escape(string $value): string

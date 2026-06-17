@@ -9,6 +9,8 @@ use WHMCS\Database\Capsule;
 
 final class ConfigStore
 {
+    private const DEFAULT_ENDPOINT = 'cvm.tencentcloudapi.com';
+
     public function get(string $key, string $default = ''): string
     {
         $row = Capsule::table(Schema::CONFIG_TABLE)
@@ -98,9 +100,32 @@ final class ConfigStore
         return [
             'secret_id' => $this->getSecret('secret_id'),
             'secret_key' => $this->getSecret('secret_key'),
-            'endpoint' => $this->get('endpoint', 'cvm.tencentcloudapi.com'),
+            'endpoint' => self::normalizeEndpoint($this->get('endpoint', self::DEFAULT_ENDPOINT)),
             'timeout_seconds' => (int) $this->get('timeout_seconds', '20'),
         ];
+    }
+
+    public static function normalizeEndpoint(string $endpoint, string $default = self::DEFAULT_ENDPOINT): string
+    {
+        $endpoint = trim($endpoint);
+        if ($endpoint === '') {
+            return $default;
+        }
+
+        if (preg_match('#^https?://#i', $endpoint) === 1) {
+            $host = parse_url($endpoint, PHP_URL_HOST);
+            $endpoint = is_string($host) ? $host : '';
+        } else {
+            $endpoint = preg_split('/[\\/:?#]/', $endpoint, 2)[0] ?? '';
+        }
+
+        $endpoint = strtolower(rtrim(trim($endpoint), '.'));
+
+        if (preg_match('/^(?:[a-z0-9-]+\\.)*tencentcloudapi\\.com$/', $endpoint) !== 1) {
+            return $default;
+        }
+
+        return $endpoint;
     }
 
     public function maskedSecretId(): string

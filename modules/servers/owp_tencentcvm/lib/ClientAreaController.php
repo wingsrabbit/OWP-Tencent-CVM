@@ -25,6 +25,7 @@ final class ClientAreaController
                 Config::clientAreaVariables($params),
                 [
                     'clientMessage' => $message,
+                    'csrfToken' => CsrfGuard::token(),
                     'instance' => $this->displayInstance($params, $instance),
                     'operations' => $operations,
                 ]
@@ -46,6 +47,10 @@ final class ClientAreaController
         $action = (string) ($_POST['owp_client_action'] ?? '');
         if ($action === '') {
             return $empty;
+        }
+
+        if (!CsrfGuard::validatePost()) {
+            return ['type' => 'warning', 'text' => 'Security token expired or invalid; no Tencent Cloud API call was made. Refresh the page and retry.', 'consoleUrl' => ''];
         }
 
         $manager = new LifecycleManager('client', $this->clientActor($params));
@@ -209,8 +214,8 @@ final class ClientAreaController
         $instance = $serviceId > 0 ? Instances::findByServiceId($serviceId) : null;
         $templateId = isset($instance['template_id']) && (int) $instance['template_id'] > 0 ? (int) $instance['template_id'] : null;
 
-        Operations::record($serviceId, $templateId, 'ReinstallInstance', 'blocked', 'Reinstall is not supported in v0.6.', '', 'client', $this->clientActor($params));
+        Operations::record($serviceId, $templateId, 'ReinstallInstance', 'blocked', 'Reinstall is not supported in v0.7.1.', '', 'client', $this->clientActor($params));
 
-        return ['type' => 'warning', 'text' => 'Reinstall is not supported in v0.6; no Tencent Cloud API call was made.', 'consoleUrl' => ''];
+        return ['type' => 'warning', 'text' => 'Reinstall is not supported in v0.7.1; no Tencent Cloud API call was made.', 'consoleUrl' => ''];
     }
 }
