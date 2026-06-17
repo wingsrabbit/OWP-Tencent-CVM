@@ -1,6 +1,6 @@
 # Install Guide
 
-OWP Tencent CVM v0.8.3 is a WHMCS module with a bundled Tencent Cloud API client,
+OWP Tencent CVM v0.8.4 is a WHMCS module with a bundled Tencent Cloud API client,
 encrypted credential storage, admin-side resource templates, read-only template
 validation, automatic VPC/subnet/security-group reuse, direct EIP and Anycast
 EIP modes, guarded CreateAccount provisioning, guarded service lifecycle
@@ -34,7 +34,7 @@ WHMCS Capsule database layer.
 1. In WHMCS admin, go to Setup -> Addon Modules.
 2. Activate `OWP Tencent CVM`.
 3. Open Addons -> OWP Tencent CVM.
-4. Confirm the admin page shows version `0.8.3` in the module metadata.
+4. Confirm the admin page shows version `0.8.4` in the module metadata.
 5. Save credentials and create at least one resource template.
 6. Use `Validate` on each template to check zone, image, instance type, fixed subnet, fixed security group, public IP mode, and bandwidth policy before enabling sales. Blank VPC, subnet, or security group fields are skipped during validation and auto-created or reused during provisioning.
 
