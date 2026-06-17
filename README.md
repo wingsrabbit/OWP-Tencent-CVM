@@ -2,7 +2,7 @@
 
 > **WHMCS Tencent Cloud CVM provisioning suite** -- a paired server module and addon module for selling, provisioning, and managing Tencent Cloud CVM instances from WHMCS.
 
-![version](https://img.shields.io/badge/version-v0.6-blue)
+![version](https://img.shields.io/badge/version-v0.7-blue)
 ![WHMCS](https://img.shields.io/badge/WHMCS-9.x-2a9fd6)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)
 ![license](https://img.shields.io/badge/license-MIT-orange)
@@ -11,7 +11,7 @@
 
 ## Status
 
-This repository is in the v0.6 client-area implementation stage. It now contains
+This repository is in the v0.7 release-package documentation stage. It now contains
 the paired WHMCS server module and addon module layout, shared PHP library
 loader, idempotent addon table creation, a customer control panel, a
 self-contained Tencent Cloud API 3.0 client, encrypted credential storage, and
@@ -21,8 +21,9 @@ CreateAccount is wired with dry-run enabled by default, validated-template
 gating, Tencent `ClientToken` idempotency, instance persistence, guarded
 suspend/unsuspend/terminate, guarded password reset, package-change rejection
 policy, read-only status sync, and a customer-facing control panel modeled from
-the accepted design. Reinstall remains blocked until a later explicit policy
-switch.
+the accepted design. Release-package docs now cover manual WHMCS upload,
+operator checklists, and a starter Tencent Cloud CAM policy. Reinstall remains
+blocked until a later explicit policy switch.
 
 - `modules/servers/owp_tencentcvm/`: WHMCS provisioning module for service lifecycle and client-area controls.
 - `modules/addons/owp_tencentcvm/`: WHMCS addon module for admin-side Tencent Cloud credentials, sellable templates, resource policy, logs, and recovery tools.
@@ -74,6 +75,8 @@ The module should call Tencent Cloud API 3.0 directly with a small self-containe
 ```text
 docs/
   INSTALL.md
+  CAM_POLICY.md
+  RELEASE.md
   TENCENT_API.md
   design/
     client-area-prompt.md
@@ -110,6 +113,12 @@ activation checklist.
 
 See [docs/TENCENT_API.md](docs/TENCENT_API.md) for the bundled Tencent Cloud API
 client behavior and safety boundaries.
+
+See [docs/RELEASE.md](docs/RELEASE.md) for the release package checklist and
+manual operator validation path.
+
+See [docs/CAM_POLICY.md](docs/CAM_POLICY.md) for a starter Tencent Cloud CAM
+policy.
 
 ## Design Workflow
 

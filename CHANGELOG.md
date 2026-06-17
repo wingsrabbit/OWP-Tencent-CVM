@@ -10,6 +10,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7] - 2026-06-17
+
+### Added
+
+- Added `docs/RELEASE.md` with package contents, build command, preflight checks, manual WHMCS upload steps, and operator validation checklist.
+- Added `docs/CAM_POLICY.md` with a starter Tencent Cloud CAM policy for the CVM and VPC API actions used by the module.
+- Added release-package links from `README.md` and `docs/INSTALL.md`.
+
+### Changed
+
+- Updated `README.md`, `VERSION`, install docs, and module version constants for the v0.7 packaging stage.
+- Clarified public package boundaries so local secrets, live service IDs, and deployment notes stay outside git and release archives.
+
 ## [0.6] - 2026-06-17
 
 ### Added
