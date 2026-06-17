@@ -314,7 +314,7 @@ Acceptance:
 
 ### v0.8.2 · EIP and Anycast provisioning fixes
 
-Status: current PR.
+Status: merged.
 
 Deliverables:
 
@@ -328,6 +328,22 @@ Acceptance:
 - EIP and Anycast templates do not send CVM public-bandwidth parameters while direct public IP templates still do.
 - Anycast EIP allocation can read the returned EIP ID when `AddressSet` contains strings.
 - Anycast bandwidth cap is applied during allocation without requiring a later bandwidth mutation API.
+
+### v0.8.3 · EIP association readiness wait
+
+Status: current PR.
+
+Deliverables:
+
+- Poll `DescribeAddresses` after ordinary EIP and Anycast EIP allocation.
+- Wait until `AddressStatus` reaches `UNBIND` before calling `AssociateAddress`.
+- Record a successful readiness check and fail with a clear timeout if the EIP never becomes attachable.
+
+Acceptance:
+
+- Anycast EIP provisioning does not call `AssociateAddress` while the address is still `CREATING`.
+- Ordinary EIP provisioning uses the same bounded readiness wait without changing allocation payloads.
+- Timeout errors identify the EIP ID and last observed address status.
 
 ---
 
