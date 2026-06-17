@@ -43,8 +43,8 @@ final class Operations
         return [
             'version' => Config::version(),
             'tables' => Schema::tables(),
-            'apiStatus' => 'Not configured in v0.2 skeleton',
-            'liveCalls' => 'disabled',
+            'apiStatus' => 'Client available; credentials and lifecycle wiring are pending',
+            'liveCalls' => 'not invoked by WHMCS lifecycle entrypoints',
         ];
     }
 }

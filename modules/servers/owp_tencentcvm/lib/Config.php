@@ -11,7 +11,7 @@ final class Config
 
     public static function version(): string
     {
-        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.2';
+        return defined('OWP_TENCENTCVM_VERSION') ? OWP_TENCENTCVM_VERSION : '0.3';
     }
 
     /**
@@ -25,7 +25,7 @@ final class Config
             'Template Name' => [
                 'Type' => 'text',
                 'Size' => '40',
-                'Description' => 'Admin-defined CVM resource template name. v0.2 stores the setting only.',
+                'Description' => 'Admin-defined CVM resource template name. Lifecycle wiring starts in later phases.',
             ],
             'Default Region' => [
                 'Type' => 'text',
@@ -53,7 +53,7 @@ final class Config
             'region' => isset($params['configoption2']) ? (string) $params['configoption2'] : '',
             'dryRun' => !empty($params['configoption3']),
             'statusLabel' => 'Module skeleton installed',
-            'notice' => 'Tencent Cloud CVM operations are intentionally not implemented in v0.2.',
+            'notice' => 'Tencent Cloud CVM lifecycle operations are intentionally not wired in v0.3.',
         ];
     }
 }

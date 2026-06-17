@@ -165,6 +165,8 @@ Acceptance:
 
 ### v0.3 · Self-contained Tencent Cloud API client
 
+Status: current stacked PR.
+
 Deliverables:
 
 - TC3-HMAC-SHA256 signing client.
